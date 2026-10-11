@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { DEFAULT_CONFIG, TURN_ON_MODES } from '../src/config.js';
 import { SCENE_ACTIONS, SCENE_TRIGGERS, SET_MODE_VALUES } from '../src/capabilities/scenes.js';
-import { WIDGETS } from '../src/capabilities/widget.js';
+import { BUTTON_SETS, WIDGETS } from '../src/capabilities/widget.js';
 import { MODE_LABELS } from '../src/twinkly/labels.js';
 import { DISCOVERY_PORT } from '../src/twinkly/discovery.js';
 
@@ -87,6 +87,16 @@ test('the set_mode options are the modes the code accepts', () => {
 
 test('every widget has a content handler, and vice versa', () => {
   assert.deepEqual(keysOf(manifest.widgets).sort(), Object.keys(WIDGETS).sort());
+});
+
+test('the widget button sets are the ones the code builds', () => {
+  const widget = manifest.widgets.find((w) => w.key === 'twinkly_overview');
+  const field = widget.settings.find((f) => f.key === 'buttons');
+  assert.deepEqual(
+    field.options.map((o) => o.value),
+    Object.values(BUTTON_SETS),
+  );
+  assert.equal(field.default, BUTTON_SETS.SCENES);
 });
 
 test('config_schema defaults stay equal to DEFAULT_CONFIG', () => {

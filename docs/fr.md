@@ -83,9 +83,26 @@ de Gladys « Contrôler un appareil ».
 
 ## Tableau de bord (Gladys 5.1 et plus)
 
-Le widget **Twinkly** montre une ligne par appareil (ce qu'il joue et sa
-luminosité, ou « Injoignable ») et deux boutons : **Tout allumer** et **Tout
-éteindre**.
+Le widget **Twinkly** a deux vues, au choix dans ses réglages :
+
+- **Sans Twinkly choisi** : une ligne par appareil (ce qu'il joue et sa
+  luminosité, ou « Injoignable ») et deux boutons : **Tout allumer** et **Tout
+  éteindre**.
+- **Avec un Twinkly choisi** : sa luminosité en direct, son état, la scène en
+  cours, sa couleur, son adresse IP, son nombre de LED, son firmware, et un jeu
+  de boutons (réglage **Boutons**) :
+
+  | Boutons         | Contenu                                                                        |
+  | --------------- | ------------------------------------------------------------------------------ |
+  | Scènes (défaut) | Allumer/Éteindre, scène précédente, scène suivante, Identifier                 |
+  | Luminosité      | Allumer/Éteindre, −10 %, +10 %, Max                                            |
+  | Modes           | Allumer/Éteindre et jusqu'à 3 modes : animation, playlist, couleur fixe, effet |
+  | Couleurs        | Blanc, rouge, vert, bleu (couleur fixe, firmware 2.7.1+)                       |
+
+  Une carte tient 4 boutons au plus : ajoutez le widget plusieurs fois pour
+  avoir plusieurs jeux. Les scènes tournent en boucle dans l'ordre de la liste
+  (animations, playlist, effets). La luminosité ne descend pas sous 10 % : pour
+  éteindre, utilisez **Éteindre**.
 
 ## Dépannage
 

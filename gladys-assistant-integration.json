@@ -319,11 +319,62 @@
       "key": "twinkly_overview",
       "label": { "en": "Twinkly", "fr": "Twinkly" },
       "description": {
-        "en": "What each Twinkly plays, and buttons to switch them all on or off.",
-        "fr": "Ce que joue chaque Twinkly, et des boutons pour tout allumer ou tout éteindre."
+        "en": "Every Twinkly at a glance, or one Twinkly with its brightness, scene, modes and colors.",
+        "fr": "Tous les Twinkly d'un coup d'œil, ou un Twinkly avec sa luminosité, ses scènes, modes et couleurs."
       },
       "icon": "star",
-      "action_timeout_seconds": 30
+      "action_timeout_seconds": 30,
+      "settings": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Twinkly", "fr": "Twinkly" },
+          "description": {
+            "en": "Leave empty to see every Twinkly with the \"All on\" / \"All off\" buttons.",
+            "fr": "Laissez vide pour voir tous les Twinkly avec les boutons « Tout allumer » / « Tout éteindre »."
+          },
+          "required": false
+        },
+        {
+          "key": "buttons",
+          "type": "select",
+          "label": { "en": "Buttons", "fr": "Boutons" },
+          "description": {
+            "en": "Buttons shown for the chosen Twinkly (4 at most per card: add the widget again for another set).",
+            "fr": "Boutons affichés pour le Twinkly choisi (4 au plus par carte : ajoutez le widget une autre fois pour un autre jeu)."
+          },
+          "required": false,
+          "default": "scenes",
+          "options": [
+            {
+              "value": "scenes",
+              "label": {
+                "en": "On/off, previous/next scene, identify",
+                "fr": "Allumer/éteindre, scène précédente/suivante, identifier"
+              }
+            },
+            {
+              "value": "brightness",
+              "label": {
+                "en": "On/off, brightness −/+/max",
+                "fr": "Allumer/éteindre, luminosité −/+/max"
+              }
+            },
+            {
+              "value": "modes",
+              "label": {
+                "en": "On/off and modes (movie, playlist, color, effect)",
+                "fr": "Allumer/éteindre et modes (animation, playlist, couleur, effet)"
+              }
+            },
+            {
+              "value": "colors",
+              "label": { "en": "Solid colors", "fr": "Couleurs fixes" }
+            }
+          ]
+        }
+      ]
     }
   ]
 }
