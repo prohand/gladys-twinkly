@@ -25,6 +25,7 @@ import {
   idsOf,
   parseScene,
   readState,
+  sceneOptions,
   statesOf,
 } from '../devices/twinkly.js';
 import { SCENE_TRIGGERS, SET_MODE_VALUES, fireTrigger } from '../capabilities/scenes.js';
@@ -33,6 +34,9 @@ const logger = createLogger({ name: 'twinkly' });
 
 /** Never re-run a discovery for a lost device more often than this. */
 export const REDISCOVERY_MIN_MS = 5 * 60 * 1000;
+
+/** Brightness points one widget tap adds or removes, and the floor it stops at. */
+export const BRIGHTNESS_STEP = 10;
 
 /** How long "Identify" keeps the demo mode on. */
 export const IDENTIFY_MS = 5000;
@@ -398,20 +402,10 @@ export class TwinklyService {
         });
         return;
       case ids.feature(FEATURES.BRIGHTNESS):
-        await this.command(entry, async () => {
-          await entry.client.setBrightness(value);
-          // Like any dimmable light: raising the level of a light that is off
-          // turns it on.
-          if (Number(value) > 0 && entry.lastMode === LED_MODES.OFF) {
-            await this.turnOn(entry);
-          }
-        });
+        await this.command(entry, () => this.applyBrightness(entry, value));
         return;
       case ids.feature(FEATURES.COLOR):
-        await this.command(entry, async () => {
-          await entry.client.setColor(intToRgb(value));
-          await entry.client.setMode(LED_MODES.COLOR);
-        });
+        await this.command(entry, () => this.applyColor(entry, value));
         return;
       case ids.feature(FEATURES.SCENE): {
         const scene = parseScene(entry, value);
@@ -424,6 +418,20 @@ export class TwinklyService {
       default:
         throw new Error(`Unknown feature ${feature.external_id}`);
     }
+  }
+
+  async applyBrightness(entry, value) {
+    await entry.client.setBrightness(value);
+    // Like any dimmable light: raising the level of a light that is off
+    // turns it on.
+    if (Number(value) > 0 && entry.lastMode === LED_MODES.OFF) {
+      await this.turnOn(entry);
+    }
+  }
+
+  async applyColor(entry, value) {
+    await entry.client.setColor(intToRgb(value));
+    await entry.client.setMode(LED_MODES.COLOR);
   }
 
   async startScene(entry, scene) {
@@ -511,6 +519,54 @@ export class TwinklyService {
       }
     });
     return applied;
+  }
+
+  /**
+   * Move the brightness by `delta` points, kept between `BRIGHTNESS_STEP` and
+   * 100 % (a lit Twinkly at 0 % looks off, and only "off" should).
+   * @returns {Promise<number>} the brightness asked for
+   */
+  async stepBrightness(externalId, delta) {
+    const entry = await this.requireEntry(externalId);
+    const from = entry.lastBrightness ?? 100;
+    const level = Math.min(100, Math.max(BRIGHTNESS_STEP, from + delta));
+    await this.command(entry, () => this.applyBrightness(entry, level));
+    return level;
+  }
+
+  /** Set the brightness, in %. */
+  async setBrightness(externalId, level) {
+    const entry = await this.requireEntry(externalId);
+    await this.command(entry, () => this.applyBrightness(entry, level));
+    return level;
+  }
+
+  /** Show a solid color (`0xRRGGBB`). */
+  async setColor(externalId, color) {
+    const entry = await this.requireEntry(externalId);
+    if (!entry.hasColor) {
+      throw new Error(`${entry.name} has no solid color mode (firmware too old)`);
+    }
+    await this.command(entry, () => this.applyColor(entry, color));
+    return color;
+  }
+
+  /**
+   * Play the next (`step` = 1) or previous (-1) choice of the scene list,
+   * looping at both ends.
+   * @returns {Promise<{value: string, label: string}>} the scene played
+   */
+  async stepScene(externalId, step) {
+    const entry = await this.requireEntry(externalId);
+    const options = sceneOptions(entry);
+    if (options.length === 0) {
+      throw new Error(`${entry.name} has no scene to play`);
+    }
+    const index = options.findIndex((option) => option.value === entry.lastScene);
+    const start = index === -1 ? (step > 0 ? -1 : 0) : index;
+    const next = options[(((start + step) % options.length) + options.length) % options.length];
+    await this.command(entry, () => this.startScene(entry, parseScene(entry, next.value)));
+    return next;
   }
 
   /** Every known device on, or off. */

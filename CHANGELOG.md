@@ -26,5 +26,8 @@ the version's GitHub Release.
 - CI on Node 22 and 24, store admission checks and Docker build on pull requests,
   Release workflow, GitHub releases, Dependabot.
 - `SECURITY.md`, `CHANGELOG.md` and `CLAUDE.md`.
+- The Twinkly widget can show one chosen Twinkly: live brightness, state, scene,
+  color, IP, LEDs, firmware, and a set of buttons picked in its settings (on/off,
+  previous/next scene, identify; brightness −/+/max; modes; solid colors).
 
 [Unreleased]: https://github.com/prohand/gladys-twinkly/commits/main

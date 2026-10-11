@@ -82,8 +82,24 @@ To set color and brightness in a scene, use the standard Gladys action
 
 ## Dashboard (Gladys 5.1 and later)
 
-The **Twinkly** widget shows one row per device (what it plays and how
-bright, or "Unreachable") and two buttons: **All on** and **All off**.
+The **Twinkly** widget has two views, picked in its settings:
+
+- **No Twinkly chosen**: one row per device (what it plays and how bright, or
+  "Unreachable") and two buttons: **All on** and **All off**.
+- **One Twinkly chosen**: its live brightness, its state, the scene playing,
+  its color, IP address, LED count and firmware, and a set of buttons (the
+  **Buttons** setting):
+
+  | Buttons          | What they do                                                        |
+  | ---------------- | ------------------------------------------------------------------- |
+  | Scenes (default) | Turn on/off, previous scene, next scene, Identify                   |
+  | Brightness       | Turn on/off, −10 %, +10 %, Max                                      |
+  | Modes            | Turn on/off and up to 3 modes: movie, playlist, solid color, effect |
+  | Colors           | White, red, green, blue (solid color, firmware 2.7.1+)              |
+
+  A card holds 4 buttons at most: add the widget several times to get several
+  sets. Scenes loop in the list order (movies, playlist, effects). Brightness
+  does not go below 10 %: to switch off, use **Turn off**.
 
 ## Troubleshooting
 
