@@ -1,0 +1,329 @@
+{
+  "manifest_version": 1,
+  "type": "device",
+  "name": "Twinkly",
+  "description": {
+    "en": "Control your Twinkly smart LED lights over your local network.",
+    "fr": "Pilotez vos guirlandes et lumières LED Twinkly sur votre réseau local."
+  },
+  "version": "1.0.0",
+  "docker_image": "ghcr.io/prohand/gladys-twinkly:1.0.0",
+  "gladys_version": ">=5.1.0",
+  "cover_image": "https://raw.githubusercontent.com/prohand/gladys-twinkly/main/cover.png",
+  "categories": ["lighting"],
+  "transports": ["local"],
+  "network_discovery": [{ "type": "udp-active-broadcast", "ports": [5555] }],
+  "config_schema": [
+    {
+      "key": "intro",
+      "type": "section",
+      "label": { "en": "Getting started", "fr": "Pour commencer" },
+      "description": {
+        "en": "Set up your Twinkly in the Twinkly app first, on the same network as Gladys. Gladys then drives it locally, without any account or cloud: it finds it by itself (network scan), or you type its IP address below.",
+        "fr": "Installez d'abord votre Twinkly avec l'application Twinkly, sur le même réseau que Gladys. Gladys le pilote ensuite en local, sans compte ni cloud : elle le trouve seule (recherche réseau), ou vous saisissez son adresse IP ci-dessous."
+      },
+      "links": [
+        {
+          "url": "https://github.com/prohand/gladys-twinkly/blob/main/docs/en.md",
+          "label": { "en": "Integration documentation", "fr": "Documentation de l'intégration" }
+        }
+      ]
+    },
+    {
+      "key": "hosts",
+      "type": "string",
+      "label": { "en": "IP addresses", "fr": "Adresses IP" },
+      "description": {
+        "en": "IP addresses of your Twinkly devices, separated by commas. Optional when the network scan finds them; give them a fixed IP (DHCP reservation) in your router.",
+        "fr": "Adresses IP de vos Twinkly, séparées par des virgules. Facultatif si la recherche réseau les trouve ; donnez-leur une IP fixe (réservation DHCP) dans votre box."
+      },
+      "placeholder": { "en": "192.168.1.40, 192.168.1.41", "fr": "192.168.1.40, 192.168.1.41" },
+      "required": false,
+      "default": ""
+    },
+    {
+      "key": "auto_discovery",
+      "type": "boolean",
+      "label": { "en": "Network scan", "fr": "Recherche réseau" },
+      "description": {
+        "en": "Look for Twinkly devices on the network (UDP broadcast on port 5555, sent by Gladys). Turn it off if your network blocks broadcasts and you typed the IP addresses.",
+        "fr": "Cherche les Twinkly sur le réseau (diffusion UDP sur le port 5555, émise par Gladys). Désactivez-la si votre réseau bloque la diffusion et que vous avez saisi les adresses IP."
+      },
+      "required": false,
+      "default": true
+    },
+    {
+      "key": "refresh_interval",
+      "type": "select",
+      "label": { "en": "Refresh interval", "fr": "Intervalle de rafraîchissement" },
+      "description": {
+        "en": "How often Gladys reads each Twinkly, to follow changes made from the app.",
+        "fr": "Fréquence de lecture de chaque Twinkly, pour suivre les changements faits depuis l'application."
+      },
+      "required": false,
+      "default": "30",
+      "options": [
+        { "value": "10", "label": { "en": "10 seconds", "fr": "10 secondes" } },
+        { "value": "15", "label": { "en": "15 seconds", "fr": "15 secondes" } },
+        { "value": "30", "label": { "en": "30 seconds", "fr": "30 secondes" } },
+        { "value": "60", "label": { "en": "1 minute", "fr": "1 minute" } }
+      ]
+    },
+    {
+      "key": "turn_on_mode",
+      "type": "select",
+      "label": { "en": "When turned on, play", "fr": "À l'allumage, jouer" },
+      "description": {
+        "en": "What a Twinkly shows when Gladys turns it on.",
+        "fr": "Ce qu'affiche un Twinkly quand Gladys l'allume."
+      },
+      "required": false,
+      "default": "last",
+      "options": [
+        {
+          "value": "last",
+          "label": { "en": "What it played last", "fr": "Ce qu'il jouait en dernier" }
+        },
+        { "value": "movie", "label": { "en": "The current movie", "fr": "L'animation en cours" } },
+        { "value": "effect", "label": { "en": "The current effect", "fr": "L'effet en cours" } },
+        { "value": "playlist", "label": { "en": "The playlist", "fr": "La playlist" } },
+        { "value": "color", "label": { "en": "The solid color", "fr": "La couleur fixe" } }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "key": "test_connection",
+      "label": { "en": "Test the connection", "fr": "Tester la connexion" },
+      "timeout_seconds": 30
+    },
+    {
+      "key": "identify",
+      "label": { "en": "Identify a Twinkly", "fr": "Identifier un Twinkly" },
+      "timeout_seconds": 30,
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Device", "fr": "Appareil" },
+          "required": true
+        }
+      ]
+    }
+  ],
+  "scene_triggers": [
+    {
+      "key": "mode_changed",
+      "label": { "en": "A Twinkly changed mode", "fr": "Un Twinkly a changé de mode" },
+      "description": {
+        "en": "What a Twinkly plays changed outside Gladys: from the app, its button or its own timer.",
+        "fr": "Ce que joue un Twinkly a changé hors de Gladys : depuis l'application, son bouton ou sa minuterie."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Twinkly", "fr": "Twinkly" },
+          "required": false
+        },
+        {
+          "key": "mode",
+          "type": "multi_select",
+          "label": { "en": "New mode", "fr": "Nouveau mode" },
+          "options": [
+            { "value": "off", "label": { "en": "Off", "fr": "Éteint" } },
+            { "value": "movie", "label": { "en": "Movie", "fr": "Animation" } },
+            { "value": "effect", "label": { "en": "Effect", "fr": "Effet" } },
+            { "value": "playlist", "label": { "en": "Playlist", "fr": "Playlist" } },
+            { "value": "color", "label": { "en": "Solid color", "fr": "Couleur fixe" } },
+            { "value": "demo", "label": { "en": "Demo", "fr": "Démo" } },
+            { "value": "rt", "label": { "en": "Real time", "fr": "Temps réel" } }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "device_name",
+          "type": "string",
+          "label": { "en": "Twinkly name", "fr": "Nom du Twinkly" }
+        },
+        { "key": "mode", "type": "string", "label": { "en": "New mode", "fr": "Nouveau mode" } },
+        {
+          "key": "previous_mode",
+          "type": "string",
+          "label": { "en": "Previous mode", "fr": "Mode précédent" }
+        }
+      ]
+    },
+    {
+      "key": "device_offline",
+      "label": { "en": "A Twinkly is unreachable", "fr": "Un Twinkly est injoignable" },
+      "description": {
+        "en": "A Twinkly stopped answering on the network: unplugged, Wi-Fi lost, new IP address.",
+        "fr": "Un Twinkly ne répond plus sur le réseau : débranché, Wi-Fi perdu, nouvelle adresse IP."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Twinkly", "fr": "Twinkly" },
+          "required": false
+        }
+      ],
+      "variables": [
+        {
+          "key": "device_name",
+          "type": "string",
+          "label": { "en": "Twinkly name", "fr": "Nom du Twinkly" }
+        }
+      ]
+    },
+    {
+      "key": "device_online",
+      "label": { "en": "A Twinkly answers again", "fr": "Un Twinkly répond à nouveau" },
+      "description": {
+        "en": "A Twinkly that was unreachable answers on the network again.",
+        "fr": "Un Twinkly qui était injoignable répond à nouveau sur le réseau."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Twinkly", "fr": "Twinkly" },
+          "required": false
+        }
+      ],
+      "variables": [
+        {
+          "key": "device_name",
+          "type": "string",
+          "label": { "en": "Twinkly name", "fr": "Nom du Twinkly" }
+        }
+      ]
+    }
+  ],
+  "scene_actions": [
+    {
+      "key": "play_movie",
+      "label": { "en": "Play a Twinkly movie", "fr": "Jouer une animation Twinkly" },
+      "description": {
+        "en": "Play a movie uploaded from the Twinkly app, by its name or its position in the list.",
+        "fr": "Joue une animation chargée depuis l'application Twinkly, par son nom ou sa position dans la liste."
+      },
+      "timeout_seconds": 15,
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Twinkly", "fr": "Twinkly" },
+          "required": true
+        },
+        {
+          "key": "movie",
+          "type": "string",
+          "label": { "en": "Movie name (or number)", "fr": "Nom de l'animation (ou numéro)" },
+          "placeholder": { "en": "Snowfall", "fr": "Neige" },
+          "required": true
+        }
+      ],
+      "outputs": [
+        {
+          "key": "movie",
+          "type": "string",
+          "label": { "en": "Movie played", "fr": "Animation jouée" }
+        }
+      ]
+    },
+    {
+      "key": "play_effect",
+      "label": { "en": "Play a Twinkly effect", "fr": "Jouer un effet Twinkly" },
+      "description": {
+        "en": "Play one of the effects built into the Twinkly, by its number.",
+        "fr": "Joue un des effets intégrés au Twinkly, par son numéro."
+      },
+      "timeout_seconds": 15,
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Twinkly", "fr": "Twinkly" },
+          "required": true
+        },
+        {
+          "key": "effect",
+          "type": "number",
+          "label": { "en": "Effect number", "fr": "Numéro de l'effet" },
+          "required": true,
+          "default": 1,
+          "min": 1,
+          "max": 99
+        }
+      ],
+      "outputs": [
+        {
+          "key": "effect",
+          "type": "number",
+          "label": { "en": "Effect played", "fr": "Effet joué" }
+        }
+      ]
+    },
+    {
+      "key": "set_mode",
+      "label": { "en": "Change a Twinkly mode", "fr": "Changer le mode d'un Twinkly" },
+      "description": {
+        "en": "Switch a Twinkly on, off, or to a movie, an effect, the playlist, its solid color or its demo.",
+        "fr": "Allume ou éteint un Twinkly, ou le passe sur une animation, un effet, la playlist, sa couleur fixe ou sa démo."
+      },
+      "timeout_seconds": 15,
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Twinkly", "fr": "Twinkly" },
+          "required": true
+        },
+        {
+          "key": "mode",
+          "type": "select",
+          "label": { "en": "Mode", "fr": "Mode" },
+          "required": true,
+          "options": [
+            { "value": "on", "label": { "en": "On", "fr": "Allumé" } },
+            { "value": "off", "label": { "en": "Off", "fr": "Éteint" } },
+            { "value": "movie", "label": { "en": "Movie", "fr": "Animation" } },
+            { "value": "effect", "label": { "en": "Effect", "fr": "Effet" } },
+            { "value": "playlist", "label": { "en": "Playlist", "fr": "Playlist" } },
+            { "value": "color", "label": { "en": "Solid color", "fr": "Couleur fixe" } },
+            { "value": "demo", "label": { "en": "Demo", "fr": "Démo" } }
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "key": "mode",
+          "type": "string",
+          "label": { "en": "Mode applied", "fr": "Mode appliqué" }
+        }
+      ]
+    }
+  ],
+  "widgets": [
+    {
+      "key": "twinkly_overview",
+      "label": { "en": "Twinkly", "fr": "Twinkly" },
+      "description": {
+        "en": "What each Twinkly plays, and buttons to switch them all on or off.",
+        "fr": "Ce que joue chaque Twinkly, et des boutons pour tout allumer ou tout éteindre."
+      },
+      "icon": "star",
+      "action_timeout_seconds": 30
+    }
+  ]
+}
