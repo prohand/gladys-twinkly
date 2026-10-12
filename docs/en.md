@@ -9,6 +9,7 @@ This integration connects Gladys to your **Twinkly** smart LED lights
 - Set up each Twinkly with the **Twinkly app** first, and connect it to your
   Wi-Fi.
 - It must be on the **same network** as Gladys.
+- Gladys **5.2** or later.
 - Recommended: give it a **fixed IP** (DHCP reservation in your router). If
   its IP changes, the integration finds it again, but more slowly.
 
@@ -90,16 +91,22 @@ The **Twinkly** widget has two views, picked in its settings:
   its color, IP address, LED count and firmware, and a set of buttons (the
   **Buttons** setting):
 
-  | Buttons          | What they do                                                        |
-  | ---------------- | ------------------------------------------------------------------- |
-  | Scenes (default) | Turn on/off, previous scene, next scene, Identify                   |
-  | Brightness       | Turn on/off, −10 %, +10 %, Max                                      |
-  | Modes            | Turn on/off and up to 3 modes: movie, playlist, solid color, effect |
-  | Colors           | White, red, green, blue (solid color, firmware 2.7.1+)              |
+  | Buttons          | What they do                                                          |
+  | ---------------- | --------------------------------------------------------------------- |
+  | Scenes (default) | Turn on/off, previous scene, next scene, Identify                     |
+  | Brightness       | Turn on/off, −10 %, +10 %, Max                                        |
+  | Modes            | Turn on/off, **Play…** (see below) and up to 2 modes: movie, playlist |
+  | Colors           | White, red, green, blue (solid color, firmware 2.7.1+)                |
 
   A card holds 4 buttons at most: add the widget several times to get several
   sets. Scenes loop in the list order (movies, playlist, effects). Brightness
   does not go below 10 %: to switch off, use **Turn off**.
+
+  **Play…** opens a small form in the card: pick what to play in one list —
+  a mode (movie, playlist, solid color, effect, demo), one of the movies
+  uploaded from the app, or a built-in effect — and, optionally, a brightness
+  (10 to 100 %; leave it empty to keep the current one). It is pre-filled with
+  what the Twinkly plays now.
 
 ## Troubleshooting
 

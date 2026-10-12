@@ -8,7 +8,7 @@
   },
   "version": "1.0.1",
   "docker_image": "ghcr.io/prohand/gladys-twinkly:1.0.1",
-  "gladys_version": ">=5.1.0",
+  "gladys_version": ">=5.2.0",
   "cover_image": "https://raw.githubusercontent.com/prohand/gladys-twinkly/main/cover.png",
   "categories": ["lighting"],
   "transports": ["local"],
@@ -622,8 +622,8 @@
             {
               "value": "modes",
               "label": {
-                "en": "On/off and modes (movie, playlist, color, effect)",
-                "fr": "Allumer/éteindre et modes (animation, playlist, couleur, effet)"
+                "en": "On/off, Play… (any mode, movie or effect), 2 modes",
+                "fr": "Allumer/éteindre, Jouer… (mode, animation, effet), 2 modes"
               }
             },
             {

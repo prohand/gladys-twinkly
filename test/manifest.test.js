@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { DEFAULT_CONFIG, TURN_ON_MODES } from '../src/config.js';
 import { SCENE_ACTIONS, SCENE_TRIGGERS, SET_MODE_VALUES } from '../src/capabilities/scenes.js';
-import { BUTTON_SETS, WIDGETS } from '../src/capabilities/widget.js';
+import { BUTTON_SETS, PLAY_FIELDS, WIDGETS, WIDGET_ACTIONS } from '../src/capabilities/widget.js';
 import { MODE_LABELS } from '../src/twinkly/labels.js';
 import { DISCOVERY_PORT } from '../src/twinkly/discovery.js';
 
@@ -63,6 +63,15 @@ test('every manifest action is registered in index.js', () => {
 test('scene triggers, scene actions and widgets need Gladys >= 5.1.0', () => {
   const [major, minor] = minGladysVersion();
   assert.ok(major > 5 || (major === 5 && minor >= 1), manifest.gladys_version);
+});
+
+// A core older than 5.2 drops the form of a widget button and runs the action
+// without `values`: the form and the version floor move together.
+test('the widget "Play…" form needs Gladys >= 5.2.0, and index.js relays its values', () => {
+  assert.ok(WIDGET_ACTIONS.PLAY && Object.keys(PLAY_FIELDS).length > 0);
+  const [major, minor] = minGladysVersion();
+  assert.ok(major > 5 || (major === 5 && minor >= 2), manifest.gladys_version);
+  assert.match(indexSource, /\{ settings, values \}/);
 });
 
 test('every scene trigger the code fires is declared, and vice versa', () => {

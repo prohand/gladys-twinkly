@@ -8,6 +8,8 @@
 // with numbers that arrive as strings.
 // -----------------------------------------------------------------------------
 
+import { DEVICE_POLL_FREQUENCIES } from '@gladysassistant/integration-sdk';
+
 /** What "on" restores, the `turn_on_mode` select of the manifest. */
 export const TURN_ON_MODES = {
   LAST: 'last',
@@ -26,10 +28,12 @@ export const DEFAULT_CONFIG = {
   turn_on_mode: TURN_ON_MODES.LAST,
 };
 
-// Gladys only accepts these poll frequencies, in milliseconds (the
-// DEVICE_POLL_FREQUENCIES of the core): any other value rejects the WHOLE
-// discovery batch and leaves the Discovery tab empty.
-export const GLADYS_POLL_FREQUENCIES_MS = [1000, 2000, 10000, 15000, 30000, 60000];
+// Gladys only accepts these poll frequencies, in milliseconds: any other value
+// rejects the WHOLE discovery batch and leaves the Discovery tab empty. The SDK
+// mirrors the core's enum, so the list follows it instead of a copy here.
+export const GLADYS_POLL_FREQUENCIES_MS = Object.values(DEVICE_POLL_FREQUENCIES).sort(
+  (a, b) => a - b,
+);
 
 /**
  * The Gladys poll frequency (ms) for a refresh interval in seconds: the

@@ -8,6 +8,10 @@
 //     of buttons picked by the `buttons` setting (scenes, brightness, modes,
 //     colors). A card holds 4 buttons at most, so each set is one card: add
 //     the widget several times to get them all.
+// The "modes" set carries a "Play…" button that opens a form (Gladys 5.2+):
+// every mode, movie and effect of THAT device in one select, plus an optional
+// brightness — the one way to reach the fifth effect from a wall panel without
+// tapping "next" five times.
 // The content is declarative, the core renders it (see the "Dashboard widgets"
 // section of the SDK README): at most 10 status rows and 4 buttons.
 //
@@ -38,7 +42,29 @@ export const WIDGET_ACTIONS = {
   BRIGHTNESS_DOWN: 'brightness_down',
   BRIGHTNESS_UP: 'brightness_up',
   BRIGHTNESS_MAX: 'brightness_max',
+  PLAY: 'play',
 };
+
+/** Fields of the form behind the "Play…" button. */
+export const PLAY_FIELDS = {
+  WHAT: 'what',
+  BRIGHTNESS: 'brightness',
+};
+
+/** Prefix of the mode choices of the "Play…" select; scenes keep their own values. */
+const PLAY_MODE_PREFIX = 'mode:';
+
+/** Modes the "Play…" select offers before the movies and effects. */
+const PLAY_MODES = [
+  LED_MODES.MOVIE,
+  LED_MODES.PLAYLIST,
+  LED_MODES.COLOR,
+  LED_MODES.EFFECT,
+  LED_MODES.DEMO,
+];
+
+/** The core truncates a form option label past 40 characters: cut it ourselves. */
+const MAX_OPTION_LABEL = 40;
 
 /**
  * Mode and color buttons: one action key each (the core drops a button whose
@@ -140,6 +166,75 @@ function modeUsable(entry, mode) {
   }
 }
 
+const clip = (text) =>
+  text.length > MAX_OPTION_LABEL ? `${text.slice(0, MAX_OPTION_LABEL - 1)}…` : text;
+
+/**
+ * The choices of the "Play…" select, built from what THIS device holds when
+ * the content is built (a form carries static options, never a `source`):
+ * the modes it can play, then its movies and its effects. The playlist scene
+ * is left out, the playlist mode already starts it.
+ * @returns {Array<{value: string, label: {en: string, fr: string}}>}
+ */
+export function playOptions(entry) {
+  const modes = PLAY_MODES.filter((mode) => modeUsable(entry, mode)).map((mode) => ({
+    value: `${PLAY_MODE_PREFIX}${mode}`,
+    label: modeLabel(mode),
+  }));
+  const scenes = sceneOptions(entry)
+    .filter((option) => option.value !== PLAYLIST_SCENE)
+    .map((option) => {
+      const label = sceneLabel(entry, option.value);
+      if (option.value.startsWith('movie:')) {
+        return {
+          value: option.value,
+          label: { en: clip(`Movie: ${label.en}`), fr: clip(`Animation : ${label.fr}`) },
+        };
+      }
+      return { value: option.value, label: { en: clip(label.en), fr: clip(label.fr) } };
+    });
+  return [...modes, ...scenes];
+}
+
+/** The "Play…" button: its form opens inside the card on a tap. */
+function playButton(entry) {
+  const options = playOptions(entry);
+  // What plays now is the natural starting point of the form.
+  const current =
+    entry.lastMode !== LED_MODES.OFF && options.some((o) => o.value === entry.lastScene)
+      ? entry.lastScene
+      : options[0].value;
+  return {
+    type: 'button',
+    label: { en: 'Play…', fr: 'Jouer…' },
+    icon: 'list',
+    style: 'primary',
+    action: {
+      key: WIDGET_ACTIONS.PLAY,
+      fields: [
+        {
+          key: PLAY_FIELDS.WHAT,
+          type: 'select',
+          label: { en: 'What to play', fr: 'Que jouer' },
+          required: true,
+          default: current,
+          options,
+        },
+        {
+          // No default: an empty field leaves the brightness as it is.
+          key: PLAY_FIELDS.BRIGHTNESS,
+          type: 'number',
+          label: { en: 'Brightness (%)', fr: 'Luminosité (%)' },
+          placeholder: { en: 'Unchanged', fr: 'Inchangée' },
+          required: false,
+          min: BRIGHTNESS_STEP,
+          max: 100,
+        },
+      ],
+    },
+  };
+}
+
 function buttonsOf(entry, set) {
   switch (set) {
     case BUTTON_SETS.BRIGHTNESS:
@@ -152,8 +247,9 @@ function buttonsOf(entry, set) {
     case BUTTON_SETS.MODES:
       return [
         toggleButton(entry),
+        playButton(entry),
         ...MODE_BUTTONS.filter((mode) => modeUsable(entry, mode))
-          .slice(0, 3)
+          .slice(0, 2)
           .map((mode) => actionButton(`${MODE_ACTION_PREFIX}${mode}`, modeLabel(mode), 'play')),
       ];
     case BUTTON_SETS.COLORS:
@@ -314,10 +410,55 @@ const modeOfAction = (actionKey) =>
 const presetOfAction = (actionKey) =>
   COLOR_PRESETS.find((p) => actionKey === `${COLOR_ACTION_PREFIX}${p.key}`) ?? null;
 
+/**
+ * The "Play…" form: the choice goes through the scene action paths (set_mode,
+ * play_effect) or the scene feature path (a movie), then the brightness.
+ */
+async function runPlayAction(service, device, values) {
+  // A core older than 5.2 drops the form and runs the action without
+  // `values`: say so instead of playing something nobody chose.
+  if (!values || typeof values !== 'object' || typeof values[PLAY_FIELDS.WHAT] !== 'string') {
+    return {
+      en: 'This button needs Gladys 5.2 or later. Use the mode buttons meanwhile.',
+      fr: "Ce bouton demande Gladys 5.2 ou plus. Utilisez les boutons de mode d'ici là.",
+    };
+  }
+  const what = values[PLAY_FIELDS.WHAT];
+  const entry = service.entryByExternalId(device);
+  const choice = entry ? playOptions(entry).find((option) => option.value === what) : null;
+  let label;
+  let playing = true;
+  if (what.startsWith(PLAY_MODE_PREFIX)) {
+    const applied = await service.applyMode(device, what.slice(PLAY_MODE_PREFIX.length));
+    playing = applied !== LED_MODES.OFF;
+    label = modeLabel(applied);
+  } else if (what.startsWith('effect:')) {
+    const number = await service.playEffect(device, Number(what.slice('effect:'.length)) + 1);
+    label = { en: `Effect ${number}`, fr: `Effet ${number}` };
+  } else {
+    const scene = await service.playScene(device, what);
+    label = choice?.label ?? { en: scene.label, fr: scene.label };
+  }
+  const brightness = values[PLAY_FIELDS.BRIGHTNESS];
+  // Raising the level of a Twinkly that is off turns it on: only a device
+  // that plays something takes the brightness.
+  if (playing && typeof brightness === 'number' && Number.isFinite(brightness)) {
+    const level = await service.setBrightness(device, brightness);
+    return {
+      en: `Playing ${label.en} at ${level} %.`,
+      fr: `Lecture : ${label.fr} à ${level} %.`,
+    };
+  }
+  return { en: `Playing ${label.en}.`, fr: `Lecture : ${label.fr}.` };
+}
+
 /** A button of a one-device card, on the device of the instance settings. */
-async function runDeviceAction(service, actionKey, device) {
+async function runDeviceAction(service, actionKey, device, values) {
   if (!device) {
     throw new Error(`Widget action ${actionKey} needs a Twinkly in the widget settings`);
+  }
+  if (actionKey === WIDGET_ACTIONS.PLAY) {
+    return runPlayAction(service, device, values);
   }
   const mode = modeOfAction(actionKey);
   if (mode) {
@@ -370,8 +511,11 @@ async function runDeviceAction(service, actionKey, device) {
   }
 }
 
-/** A tapped button. Resolves the toast shown to the user. */
-export async function runOverviewAction(service, actionKey, settings = {}) {
+/**
+ * A tapped button. Resolves the toast shown to the user.
+ * @param {object} [values] the form of a button declaring `fields`, validated by the core
+ */
+export async function runOverviewAction(service, actionKey, settings = {}, values = undefined) {
   logger.info(`Widget action ${actionKey}`);
   if (actionKey === WIDGET_ACTIONS.ALL_ON || actionKey === WIDGET_ACTIONS.ALL_OFF) {
     return runAllAction(service, actionKey === WIDGET_ACTIONS.ALL_ON);
@@ -383,15 +527,15 @@ export async function runOverviewAction(service, actionKey, settings = {}) {
   if (!known) {
     throw new Error(`Unknown widget action: ${actionKey}`);
   }
-  return runDeviceAction(service, actionKey, settings.device);
+  return runDeviceAction(service, actionKey, settings.device, values);
 }
 
 /** Widget handlers, keyed by the manifest `widgets` key. */
 export const WIDGETS = {
   [OVERVIEW_WIDGET]: {
     get: (service, { settings } = {}) => buildOverview(service, settings ?? {}),
-    action: (service, { actionKey, settings } = {}) =>
-      runOverviewAction(service, actionKey, settings ?? {}),
+    action: (service, { actionKey, settings, values } = {}) =>
+      runOverviewAction(service, actionKey, settings ?? {}, values),
   },
 };
 

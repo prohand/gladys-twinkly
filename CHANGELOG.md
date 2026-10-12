@@ -40,3 +40,6 @@ the version's GitHub Release.
 ### Changed
 
 - `@gladysassistant/integration-sdk` updated to 0.15.0.
+- Requires Gladys 5.2.0: the "Modes" buttons of the Twinkly widget now carry a "Play…"
+  form — any mode, movie or effect of that Twinkly in one list, plus an optional
+  brightness — next to on/off and two mode buttons (it had three).
