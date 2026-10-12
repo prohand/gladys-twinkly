@@ -4,15 +4,24 @@ All notable changes to this integration are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [semantic versioning](https://semver.org/), bumped by the Release workflow.
 
-Describe each change under `## [Unreleased]
-
-## [1.0.1] - 2026-10-11
-
-` as you make it. The Release workflow
+Describe each change under `## [Unreleased]` as you make it. The Release workflow
 moves that section under the version it ships, and the section becomes the notes of
 the version's GitHub Release.
 
 ## [Unreleased]
+
+### Changed
+
+- `@gladysassistant/integration-sdk` updated to 0.15.0.
+- Requires Gladys 5.2.0: the "Modes" buttons of the Twinkly widget now carry a "Play…"
+  form — any mode, movie or effect of that Twinkly in one list, plus an optional
+  brightness — next to on/off and two mode buttons (it had three).
+
+### Fixed
+
+- The release script no longer takes the mention of the Unreleased heading in the changelog intro for the section itself, which had left the previous release notes inside the intro.
+
+## [1.0.1] - 2026-10-11
 
 ### Added
 
@@ -36,10 +45,3 @@ the version's GitHub Release.
 
 [Unreleased]: https://github.com/prohand/gladys-twinkly/compare/v1.0.1...HEAD
 [1.0.1]: https://github.com/prohand/gladys-twinkly/releases/tag/v1.0.1
-
-### Changed
-
-- `@gladysassistant/integration-sdk` updated to 0.15.0.
-- Requires Gladys 5.2.0: the "Modes" buttons of the Twinkly widget now carry a "Play…"
-  form — any mode, movie or effect of that Twinkly in one list, plus an optional
-  brightness — next to on/off and two mode buttons (it had three).
