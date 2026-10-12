@@ -4,6 +4,7 @@ import { validateWidgetContent } from '@gladysassistant/integration-sdk';
 import {
   BUTTON_SETS,
   COLOR_PRESETS,
+  PLAY_FIELDS,
   OVERVIEW_WIDGET,
   WIDGETS,
   WIDGET_ACTIONS,
@@ -95,8 +96,8 @@ async function oneDevice(overrides) {
   const externalId = gladysDevice(ctx.service, entry).external_id;
   const widget = WIDGETS[OVERVIEW_WIDGET];
   const get = (buttons) => widget.get(ctx.service, { settings: { device: externalId, buttons } });
-  const tap = (actionKey) =>
-    widget.action(ctx.service, { actionKey, settings: { device: externalId } });
+  const tap = (actionKey, values) =>
+    widget.action(ctx.service, { actionKey, settings: { device: externalId }, values });
   return { ...ctx, device, entry, externalId, get, tap };
 }
 
@@ -163,11 +164,14 @@ test('the brightness buttons step, stop at the bounds and go to max', async () =
 
 test('the modes set offers what the device can play', async () => {
   const { get, tap, device } = await oneDevice();
-  const modes = buttonsOf(get(BUTTON_SETS.MODES)).slice(1);
+  const modes = buttonsOf(get(BUTTON_SETS.MODES)).slice(2);
   assert.deepEqual(
     modes.map((b) => b.action.key),
-    ['mode_movie', 'mode_playlist', 'mode_color'],
+    ['mode_movie', 'mode_playlist'],
   );
+  // Out of the card since the "Play…" form, still answered for a dashboard
+  // that has not re-pulled its content yet.
+  assert.equal((await tap('mode_color')).fr, 'Mode : Couleur fixe.');
   assert.equal((await tap('mode_playlist')).fr, 'Mode : Playlist.');
   assert.equal(device.mode, 'playlist');
   await assert.rejects(tap('mode_demo'), /Unknown widget action/);
@@ -211,4 +215,128 @@ test('a device button without a device in the settings is refused', async () => 
     WIDGETS[OVERVIEW_WIDGET].action(service, { actionKey: WIDGET_ACTIONS.NEXT_SCENE }),
     /needs a Twinkly/,
   );
+});
+
+// --- The "Play…" form (Gladys 5.2+) --------------------------------------------
+
+const playButtonOf = (content) =>
+  buttonsOf(content).find((b) => b.action.key === WIDGET_ACTIONS.PLAY);
+
+test('the "Play…" form lists the modes, movies and effects of the device', async () => {
+  const { get } = await oneDevice();
+  const content = get(BUTTON_SETS.MODES);
+  assert.deepEqual(validateWidgetContent(content), []);
+  assert.equal(buttonsOf(content).length, 4);
+  const [what, brightness] = playButtonOf(content).action.fields;
+  assert.equal(what.key, PLAY_FIELDS.WHAT);
+  assert.deepEqual(
+    what.options.map((o) => o.value),
+    [
+      'mode:movie',
+      'mode:playlist',
+      'mode:color',
+      'mode:effect',
+      'mode:demo',
+      'movie:aaa-111',
+      'movie:bbb-222',
+      'effect:0',
+      'effect:1',
+      'effect:2',
+      'effect:3',
+      'effect:4',
+    ],
+  );
+  assert.deepEqual(what.options[5].label, { en: 'Movie: Snowfall', fr: 'Animation : Snowfall' });
+  // Pre-filled with what plays now.
+  assert.equal(what.default, 'movie:aaa-111');
+  assert.equal(brightness.key, PLAY_FIELDS.BRIGHTNESS);
+  assert.equal(brightness.default, undefined, 'empty means "leave the brightness alone"');
+  assert.deepEqual([brightness.min, brightness.max], [10, 100]);
+});
+
+test('a device without movies nor color offers neither in the form', async () => {
+  const { get } = await oneDevice({ movies: [], playlist: [], color: null, mode: 'effect' });
+  const content = get(BUTTON_SETS.MODES);
+  assert.deepEqual(validateWidgetContent(content), []);
+  const values = playButtonOf(content).action.fields[0].options.map((o) => o.value);
+  assert.deepEqual(values, [
+    'mode:effect',
+    'mode:demo',
+    'effect:0',
+    'effect:1',
+    'effect:2',
+    'effect:3',
+    'effect:4',
+  ]);
+});
+
+test('a long movie name is cut to the 40 characters of a form option', async () => {
+  const { get } = await oneDevice({
+    movies: [{ id: 0, name: 'A'.repeat(60), unique_id: 'long' }],
+  });
+  const content = get(BUTTON_SETS.MODES);
+  // The status row of the scene is the core's to truncate; the form is ours.
+  assert.deepEqual(
+    validateWidgetContent(content).filter((issue) => issue.includes('.action.')),
+    [],
+  );
+  const option = playButtonOf(content).action.fields[0].options.find(
+    (o) => o.value === 'movie:long',
+  );
+  assert.equal(option.label.fr.length, 40);
+});
+
+test('the form plays an effect, a movie or a mode, with the brightness', async () => {
+  const { tap, device } = await oneDevice();
+  assert.deepEqual(
+    await tap(WIDGET_ACTIONS.PLAY, {
+      [PLAY_FIELDS.WHAT]: 'effect:2',
+      [PLAY_FIELDS.BRIGHTNESS]: 40,
+    }),
+    { en: 'Playing Effect 3 at 40 %.', fr: 'Lecture : Effet 3 à 40 %.' },
+  );
+  assert.equal(device.mode, 'effect');
+  assert.equal(device.currentEffect, 2);
+  assert.equal(device.brightness, 40);
+
+  assert.equal(
+    (await tap(WIDGET_ACTIONS.PLAY, { [PLAY_FIELDS.WHAT]: 'movie:bbb-222' })).fr,
+    'Lecture : Animation : Fireworks.',
+  );
+  assert.equal(device.mode, 'movie');
+  assert.equal(device.currentMovie, 1);
+  assert.equal(device.brightness, 40, 'an empty brightness is left alone');
+
+  assert.equal(
+    (await tap(WIDGET_ACTIONS.PLAY, { [PLAY_FIELDS.WHAT]: 'mode:demo' })).en,
+    'Playing Demo.',
+  );
+  assert.equal(device.mode, 'demo');
+});
+
+test('the form refuses what the device cannot play, like the scene actions', async () => {
+  const { tap } = await oneDevice();
+  await assert.rejects(
+    tap(WIDGET_ACTIONS.PLAY, { [PLAY_FIELDS.WHAT]: 'effect:9' }),
+    /does not exist/,
+  );
+  await assert.rejects(
+    tap(WIDGET_ACTIONS.PLAY, { [PLAY_FIELDS.WHAT]: 'movie:zzz' }),
+    /Unknown scene/,
+  );
+  await assert.rejects(
+    tap(WIDGET_ACTIONS.PLAY, { [PLAY_FIELDS.WHAT]: 'mode:nope' }),
+    /Unknown mode/,
+  );
+});
+
+test('an older core that dropped the form gets an explanation, nothing plays', async () => {
+  const { tap, device } = await oneDevice();
+  for (const values of [undefined, {}, { [PLAY_FIELDS.WHAT]: 3 }]) {
+    const message = await tap(WIDGET_ACTIONS.PLAY, values);
+    assert.match(message.en, /Gladys 5\.2/);
+    assert.match(message.fr, /Gladys 5\.2/);
+  }
+  assert.equal(device.mode, 'movie');
+  assert.equal(device.currentMovie, 0);
 });

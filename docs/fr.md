@@ -9,6 +9,7 @@ votre propre réseau : pas de compte, pas de cloud.
 - Installez d'abord chaque Twinkly avec l'**application Twinkly** et
   connectez-le à votre Wi-Fi.
 - Il doit être sur le **même réseau** que Gladys.
+- Gladys **5.2** ou plus.
 - Conseillé : donnez-lui une **IP fixe** (réservation DHCP dans votre box).
   Si son IP change, l'intégration le retrouve, mais plus lentement.
 
@@ -92,17 +93,23 @@ Le widget **Twinkly** a deux vues, au choix dans ses réglages :
   cours, sa couleur, son adresse IP, son nombre de LED, son firmware, et un jeu
   de boutons (réglage **Boutons**) :
 
-  | Boutons         | Contenu                                                                        |
-  | --------------- | ------------------------------------------------------------------------------ |
-  | Scènes (défaut) | Allumer/Éteindre, scène précédente, scène suivante, Identifier                 |
-  | Luminosité      | Allumer/Éteindre, −10 %, +10 %, Max                                            |
-  | Modes           | Allumer/Éteindre et jusqu'à 3 modes : animation, playlist, couleur fixe, effet |
-  | Couleurs        | Blanc, rouge, vert, bleu (couleur fixe, firmware 2.7.1+)                       |
+  | Boutons         | Contenu                                                                               |
+  | --------------- | ------------------------------------------------------------------------------------- |
+  | Scènes (défaut) | Allumer/Éteindre, scène précédente, scène suivante, Identifier                        |
+  | Luminosité      | Allumer/Éteindre, −10 %, +10 %, Max                                                   |
+  | Modes           | Allumer/Éteindre, **Jouer…** (voir plus bas) et jusqu'à 2 modes : animation, playlist |
+  | Couleurs        | Blanc, rouge, vert, bleu (couleur fixe, firmware 2.7.1+)                              |
 
   Une carte tient 4 boutons au plus : ajoutez le widget plusieurs fois pour
   avoir plusieurs jeux. Les scènes tournent en boucle dans l'ordre de la liste
   (animations, playlist, effets). La luminosité ne descend pas sous 10 % : pour
   éteindre, utilisez **Éteindre**.
+
+  **Jouer…** ouvre un petit formulaire dans la carte : choisissez quoi jouer
+  dans une seule liste — un mode (animation, playlist, couleur fixe, effet,
+  démo), une des animations envoyées depuis l'application, ou un effet
+  intégré — et, si vous le souhaitez, une luminosité (10 à 100 % ; laissez
+  vide pour garder l'actuelle). Il est prérempli avec ce que joue le Twinkly.
 
 ## Dépannage
 

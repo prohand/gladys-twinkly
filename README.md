@@ -24,7 +24,8 @@ Since Gladys 5.1 it also extends the scene editor and the dashboard:
 
 - **Triggers**: a Twinkly changed mode (outside Gladys), is unreachable, answers again.
 - **Actions**: play a movie, play an effect, change the mode.
-- **Widget**: one row per Twinkly, "All on" / "All off" buttons.
+- **Widget**: one row per Twinkly, "All on" / "All off" buttons; or one Twinkly with button
+  sets, among them a "Play…" form (any mode, movie or effect, and a brightness — Gladys 5.2+).
 
 ## How it talks to the hardware
 

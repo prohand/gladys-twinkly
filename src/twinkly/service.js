@@ -486,6 +486,21 @@ export class TwinklyService {
   }
 
   /**
+   * Play one choice of the scene list, by its select value: the path of the
+   * scene feature, for a caller holding an external id (the widget form).
+   * @returns {Promise<{value: string, label: string}>} the scene played
+   */
+  async playScene(externalId, value) {
+    const entry = await this.requireEntry(externalId);
+    const scene = parseScene(entry, value);
+    if (!scene) {
+      throw new Error(`Unknown scene "${value}" for ${entry.name}`);
+    }
+    await this.command(entry, () => this.startScene(entry, scene));
+    return sceneOptions(entry).find((option) => option.value === value) ?? { value, label: value };
+  }
+
+  /**
    * Play a built-in effect, numbered from 1 like in the scene editor.
    * @returns {Promise<number>} the effect number played
    */
