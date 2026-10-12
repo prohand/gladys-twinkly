@@ -6,8 +6,8 @@
     "en": "Control your Twinkly smart LED lights over your local network.",
     "fr": "Pilotez vos guirlandes et lumières LED Twinkly sur votre réseau local."
   },
-  "version": "1.0.1",
-  "docker_image": "ghcr.io/prohand/gladys-twinkly:1.0.1",
+  "version": "1.1.0",
+  "docker_image": "ghcr.io/prohand/gladys-twinkly:1.1.0",
   "gladys_version": ">=5.2.0",
   "cover_image": "https://raw.githubusercontent.com/prohand/gladys-twinkly/main/cover.png",
   "categories": ["lighting"],

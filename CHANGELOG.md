@@ -10,6 +10,8 @@ the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-12
+
 ### Changed
 
 - `@gladysassistant/integration-sdk` updated to 0.15.0.
@@ -43,5 +45,6 @@ the version's GitHub Release.
   color, IP, LEDs, firmware, and a set of buttons picked in its settings (on/off,
   previous/next scene, identify; brightness −/+/max; modes; solid colors).
 
-[Unreleased]: https://github.com/prohand/gladys-twinkly/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/prohand/gladys-twinkly/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/prohand/gladys-twinkly/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/prohand/gladys-twinkly/releases/tag/v1.0.1
