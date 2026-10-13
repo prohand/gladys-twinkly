@@ -39,7 +39,8 @@ Then just type the **IP addresses**.
 
 ## Adding the devices
 
-In **Integrations → Twinkly → Discovery**, run a scan and add each Twinkly.
+In **Integrations → Twinkly → Discover**, press **Scan** and add each Twinkly
+with **Add to Gladys**.
 Each one becomes a light with:
 
 | Feature        | What it does                                                             |
@@ -79,7 +80,7 @@ Changes are seen at each read: with a 30 s interval, a scene reacts within
 | **Change a Twinkly mode** | Twinkly, mode: on, off, movie, effect, playlist, solid color, demo | `mode` (applied)      |
 
 To set color and brightness in a scene, use the standard Gladys action
-"Control a device".
+"Set device value".
 
 ## Dashboard (Gladys 5.1 and later)
 
@@ -117,5 +118,5 @@ The **Twinkly** widget has two views, picked in its settings:
   fixed IP avoids the problem.
 - **The Twinkly app and Gladys at the same time**: that works. When the app
   takes over, Gladys reconnects by itself.
-- The integration logs (the Gladys **Supervision** page) say what was found and
+- The integration logs (the **Logs** tab in Gladys) say what was found and
   what does not answer.

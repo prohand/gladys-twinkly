@@ -10,7 +10,7 @@ import { readFile } from 'node:fs/promises';
 import { DEFAULT_CONFIG, TURN_ON_MODES } from '../src/config.js';
 import { SCENE_ACTIONS, SCENE_TRIGGERS, SET_MODE_VALUES } from '../src/capabilities/scenes.js';
 import { BUTTON_SETS, PLAY_FIELDS, WIDGETS, WIDGET_ACTIONS } from '../src/capabilities/widget.js';
-import { MODE_LABELS } from '../src/twinkly/labels.js';
+import { LANGUAGES, MODE_LABELS } from '../src/twinkly/labels.js';
 import { DISCOVERY_PORT } from '../src/twinkly/discovery.js';
 
 const manifest = JSON.parse(
@@ -142,17 +142,34 @@ test('dynamic selects declare a source and no static options', () => {
   }
 });
 
-test('every text is bilingual, English and French', () => {
+test('every text is in English, French, German and Spanish', () => {
   for (const { path, value } of texts(manifest)) {
-    assert.equal(typeof value, 'object', `${path} must be a { en, fr } object`);
-    assert.ok(value.en, `${path}.en`);
-    assert.ok(value.fr, `${path}.fr`);
+    assert.equal(typeof value, 'object', `${path} must be a { en, fr, de, es } object`);
+    for (const lang of LANGUAGES) {
+      assert.ok(value[lang], `${path}.${lang}`);
+    }
   }
 });
 
 test('the catalog description holds 10 to 100 characters per language', () => {
+  assert.deepEqual(Object.keys(manifest.description), LANGUAGES);
   for (const [lang, text] of Object.entries(manifest.description)) {
     assert.ok(text.length >= 10 && text.length <= 100, `description.${lang}: ${text.length}`);
+  }
+});
+
+test('widget and section texts fit the store limits in every language', () => {
+  for (const widget of manifest.widgets) {
+    for (const lang of LANGUAGES) {
+      const label = widget.label[lang];
+      assert.ok(label.length >= 3 && label.length <= 30, `${widget.key}.label.${lang}`);
+      assert.ok(widget.description[lang].length <= 100, `${widget.key}.description.${lang}`);
+    }
+  }
+  for (const section of manifest.config_schema.filter((f) => f.type === 'section')) {
+    for (const lang of LANGUAGES) {
+      assert.ok(section.description[lang].length <= 1000, `${section.key}.description.${lang}`);
+    }
   }
 });
 
