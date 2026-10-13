@@ -39,8 +39,8 @@ clientes Wi-Fi). En ese caso, introduzca simplemente las **direcciones IP**.
 
 ## Añadir los dispositivos
 
-En **Integraciones → Twinkly → Descubrir**, lance una búsqueda y añada cada
-Twinkly. Cada uno se convierte en una luz con:
+En **Integraciones → Twinkly → Descubrir**, pulse **Buscar** y añada cada
+Twinkly con **Añadir a Gladys**. Cada uno se convierte en una luz con:
 
 | Función    | Qué hace                                                                                         |
 | ---------- | ------------------------------------------------------------------------------------------------ |
@@ -80,7 +80,7 @@ reacciona en menos de 30 s.
 | **Cambiar el modo de un Twinkly**       | Twinkly, modo: encendido, apagado, animación, efecto, lista de reproducción, color fijo, demo | `mode` (aplicado)            |
 
 Para ajustar el color y el brillo en una escena, utilice la acción estándar de
-Gladys «Controlar un dispositivo».
+Gladys «Establecer valor del dispositivo».
 
 ## Panel (Gladys 5.1 y posterior)
 
@@ -121,5 +121,5 @@ El widget **Twinkly** tiene dos vistas, que se eligen en su configuración:
   cada 5 minutos). Una IP fija evita el problema.
 - **La aplicación Twinkly y Gladys a la vez**: funciona. Cuando la aplicación
   toma el control, Gladys se vuelve a conectar por sí sola.
-- Los registros de la integración (la página **Supervisión** de Gladys) indican
+- Los registros de la integración (la pestaña **Registros** de Gladys) indican
   lo que se ha encontrado y lo que no responde.

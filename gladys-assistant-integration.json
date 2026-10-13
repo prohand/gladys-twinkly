@@ -5,7 +5,7 @@
   "description": {
     "en": "Control your Twinkly smart LED lights over your local network.",
     "fr": "Pilotez vos guirlandes et lumières LED Twinkly sur votre réseau local.",
-    "de": "Steuern Sie Ihre Twinkly-LED-Lichter über Ihr lokales Netzwerk.",
+    "de": "Steuere deine Twinkly-LED-Lichter über dein lokales Netzwerk.",
     "es": "Controle sus luces LED inteligentes Twinkly a través de su red local."
   },
   "version": "1.1.0",
@@ -33,7 +33,7 @@
       "description": {
         "en": "Set up your Twinkly in the Twinkly app first, on the same network as Gladys. Gladys then drives it locally, without any account or cloud: it finds it by itself (network scan), or you type its IP address below.",
         "fr": "Installez d'abord votre Twinkly avec l'application Twinkly, sur le même réseau que Gladys. Gladys le pilote ensuite en local, sans compte ni cloud : elle le trouve seule (recherche réseau), ou vous saisissez son adresse IP ci-dessous.",
-        "de": "Richten Sie Ihr Twinkly zuerst in der Twinkly-App ein, im selben Netzwerk wie Gladys. Gladys steuert es dann lokal, ohne Konto und ohne Cloud: Gladys findet es selbst (Netzwerksuche), oder Sie geben unten seine IP-Adresse ein.",
+        "de": "Richte dein Twinkly zuerst in der Twinkly-App ein, im selben Netzwerk wie Gladys. Gladys steuert es dann lokal, ohne Konto und ohne Cloud: Gladys findet es selbst (Netzwerksuche), oder du gibst unten seine IP-Adresse ein.",
         "es": "Configure primero su Twinkly con la aplicación Twinkly, en la misma red que Gladys. Después, Gladys lo controla en local, sin cuenta ni nube: lo encuentra por sí sola (búsqueda en la red) o usted introduce su dirección IP a continuación."
       },
       "links": [
@@ -60,7 +60,7 @@
       "description": {
         "en": "IP addresses of your Twinkly devices, separated by commas. Optional when the network scan finds them; give them a fixed IP (DHCP reservation) in your router.",
         "fr": "Adresses IP de vos Twinkly, séparées par des virgules. Facultatif si la recherche réseau les trouve ; donnez-leur une IP fixe (réservation DHCP) dans votre box.",
-        "de": "IP-Adressen Ihrer Twinkly-Geräte, durch Kommas getrennt. Optional, wenn die Netzwerksuche sie findet; geben Sie ihnen in Ihrem Router eine feste IP (DHCP-Reservierung).",
+        "de": "IP-Adressen deiner Twinkly-Geräte, durch Kommas getrennt. Optional, wenn die Netzwerksuche sie findet; gib ihnen in deinem Router eine feste IP (DHCP-Reservierung).",
         "es": "Direcciones IP de sus dispositivos Twinkly, separadas por comas. Opcional si la búsqueda en la red los encuentra; asígneles una IP fija (reserva DHCP) en su router."
       },
       "placeholder": {
@@ -84,7 +84,7 @@
       "description": {
         "en": "Look for Twinkly devices on the network (UDP broadcast on port 5555, sent by Gladys). Turn it off if your network blocks broadcasts and you typed the IP addresses.",
         "fr": "Cherche les Twinkly sur le réseau (diffusion UDP sur le port 5555, émise par Gladys). Désactivez-la si votre réseau bloque la diffusion et que vous avez saisi les adresses IP.",
-        "de": "Sucht Twinkly-Geräte im Netzwerk (UDP-Broadcast auf Port 5555, von Gladys gesendet). Deaktivieren Sie sie, wenn Ihr Netzwerk Broadcasts blockiert und Sie die IP-Adressen eingegeben haben.",
+        "de": "Sucht Twinkly-Geräte im Netzwerk (UDP-Broadcast auf Port 5555, von Gladys gesendet). Deaktiviere sie, wenn dein Netzwerk Broadcasts blockiert und du die IP-Adressen eingegeben hast.",
         "es": "Busca dispositivos Twinkly en la red (difusión UDP en el puerto 5555, enviada por Gladys). Desactívela si su red bloquea la difusión y ha introducido las direcciones IP."
       },
       "required": false,
@@ -751,7 +751,7 @@
           "description": {
             "en": "Buttons shown for the chosen Twinkly (4 at most per card: add the widget again for another set).",
             "fr": "Boutons affichés pour le Twinkly choisi (4 au plus par carte : ajoutez le widget une autre fois pour un autre jeu).",
-            "de": "Für das gewählte Twinkly angezeigte Schaltflächen (höchstens 4 pro Karte: Fügen Sie das Widget für einen weiteren Satz erneut hinzu).",
+            "de": "Für das gewählte Twinkly angezeigte Schaltflächen (höchstens 4 pro Karte: Füge das Widget für einen weiteren Satz erneut hinzu).",
             "es": "Botones mostrados para el Twinkly elegido (4 como máximo por tarjeta: añada el widget otra vez para otro juego)."
           },
           "required": false,

@@ -146,7 +146,7 @@ export class TwinklyService {
       await this.gladys.setConnectionStatus(false, {
         en: 'No Twinkly found yet: type its IP address in the configuration, or run a scan.',
         fr: 'Aucun Twinkly trouvé : saisissez son adresse IP dans la configuration, ou lancez une recherche.',
-        de: 'Noch kein Twinkly gefunden: Geben Sie seine IP-Adresse in der Konfiguration ein oder starten Sie eine Suche.',
+        de: 'Noch kein Twinkly gefunden: Gib seine IP-Adresse in der Konfiguration ein oder starte eine Suche.',
         es: 'Todavía no se ha encontrado ningún Twinkly: introduzca su dirección IP en la configuración o inicie una búsqueda.',
       });
       return;
@@ -657,7 +657,7 @@ export class TwinklyService {
         lines.push({
           en: `Network scan unavailable (${error}): type the IP addresses.`,
           fr: `Recherche réseau indisponible (${error}) : saisissez les adresses IP.`,
-          de: `Netzwerksuche nicht verfügbar (${error}): Geben Sie die IP-Adressen ein.`,
+          de: `Netzwerksuche nicht verfügbar (${error}): Gib die IP-Adressen ein.`,
           es: `Búsqueda en la red no disponible (${error}): introduzca las direcciones IP.`,
         });
       } else {

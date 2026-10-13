@@ -417,7 +417,7 @@ export function buildOverview(service, settings = {}) {
           text: {
             en: 'No Twinkly found yet. Open the integration configuration to add one.',
             fr: "Aucun Twinkly trouvé. Ouvrez la configuration de l'intégration pour en ajouter un.",
-            de: 'Noch kein Twinkly gefunden. Öffnen Sie die Konfiguration der Integration, um eines hinzuzufügen.',
+            de: 'Noch kein Twinkly gefunden. Öffne die Konfiguration der Integration, um eines hinzuzufügen.',
             es: 'Todavía no se ha encontrado ningún Twinkly. Abra la configuración de la integración para añadir uno.',
           },
         },
@@ -490,7 +490,7 @@ async function runPlayAction(service, device, values) {
     return {
       en: 'This button needs Gladys 5.2 or later. Use the mode buttons meanwhile.',
       fr: "Ce bouton demande Gladys 5.2 ou plus. Utilisez les boutons de mode d'ici là.",
-      de: 'Diese Schaltfläche erfordert Gladys 5.2 oder neuer. Verwenden Sie bis dahin die Modus-Schaltflächen.',
+      de: 'Diese Schaltfläche erfordert Gladys 5.2 oder neuer. Verwende bis dahin die Modus-Schaltflächen.',
       es: 'Este botón requiere Gladys 5.2 o posterior. Mientras tanto, utilice los botones de modo.',
     };
   }

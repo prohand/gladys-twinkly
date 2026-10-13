@@ -1,16 +1,16 @@
 # Twinkly
 
-Diese Integration verbindet Gladys mit Ihren **Twinkly**-LED-Lichtern
+Diese Integration verbindet Gladys mit deinen **Twinkly**-LED-Lichtern
 (Lichterketten, Vorhänge, Bäume, Squares, Flex, Dots…). Gladys steuert sie
-**lokal**, in Ihrem eigenen Netzwerk: ohne Konto, ohne Cloud.
+**lokal**, in deinem eigenen Netzwerk: ohne Konto, ohne Cloud.
 
-## Bevor Sie beginnen
+## Bevor du beginnst
 
-- Richten Sie jedes Twinkly zuerst mit der **Twinkly-App** ein und verbinden Sie
-  es mit Ihrem WLAN.
+- Richte jedes Twinkly zuerst mit der **Twinkly-App** ein und verbinde es mit
+  deinem WLAN.
 - Es muss sich im **selben Netzwerk** wie Gladys befinden.
 - Gladys **5.2** oder neuer.
-- Empfohlen: Geben Sie ihm eine **feste IP** (DHCP-Reservierung in Ihrem
+- Empfohlen: Gib ihm eine **feste IP** (DHCP-Reservierung in deinem
   Router). Ändert sich seine IP, findet die Integration es wieder, aber
   langsamer.
 
@@ -19,12 +19,12 @@ Twinkly hat keine öffentliche Cloud-API: Alles läuft über das lokale Netzwerk
 
 ## Konfiguration
 
-| Feld                           | Funktion                                                                                      |
-| ------------------------------ | --------------------------------------------------------------------------------------------- |
-| **IP-Adressen**                | IP-Adressen Ihrer Twinkly-Geräte, durch Kommas getrennt. Optional, wenn die Suche sie findet. |
-| **Netzwerksuche**              | Sucht Twinkly-Geräte im Netzwerk (UDP-Broadcast, Port 5555). Standardmäßig aktiviert.         |
-| **Aktualisierungsintervall**   | Wie oft jedes Twinkly abgefragt wird: 10 s, 15 s, 30 s oder 1 min.                            |
-| **Beim Einschalten abspielen** | Was ein Twinkly zeigt, wenn Gladys es einschaltet (Standard: was es zuletzt abgespielt hat).  |
+| Feld                           | Funktion                                                                                       |
+| ------------------------------ | ---------------------------------------------------------------------------------------------- |
+| **IP-Adressen**                | IP-Adressen deiner Twinkly-Geräte, durch Kommas getrennt. Optional, wenn die Suche sie findet. |
+| **Netzwerksuche**              | Sucht Twinkly-Geräte im Netzwerk (UDP-Broadcast, Port 5555). Standardmäßig aktiviert.          |
+| **Aktualisierungsintervall**   | Wie oft jedes Twinkly abgefragt wird: 10 s, 15 s, 30 s oder 1 min.                             |
+| **Beim Einschalten abspielen** | Was ein Twinkly zeigt, wenn Gladys es einschaltet (Standard: was es zuletzt abgespielt hat).   |
 
 **Verbindung testen** sucht die Twinkly-Geräte und listet auf, was antwortet:
 Name, Adresse, Anzahl der LEDs, Firmware-Version, aktueller Modus.
@@ -37,12 +37,12 @@ ist.
 
 Der Container der Integration sieht keine Netzwerk-Broadcasts: Gladys sendet
 die Suche für ihn. Manche Netzwerke blockieren sie (getrennte VLANs,
-WLAN-Client-Isolation). Geben Sie dann einfach die **IP-Adressen** ein.
+WLAN-Client-Isolation). Gib dann einfach die **IP-Adressen** ein.
 
 ## Geräte hinzufügen
 
-Starten Sie unter **Integrationen → Twinkly → Entdecken** eine Suche und fügen
-Sie jedes Twinkly hinzu. Jedes wird zu einer Leuchte mit:
+Drücke unter **Integrationen → Twinkly → Entdecken** auf **Scannen** und füge
+jedes Twinkly mit **Zu Gladys hinzufügen** hinzu. Jedes wird zu einer Leuchte mit:
 
 | Funktion       | Wirkung                                                                                |
 | -------------- | -------------------------------------------------------------------------------------- |
@@ -54,7 +54,7 @@ Sie jedes Twinkly hinzu. Jedes wird zu einer Leuchte mit:
 Das Gerät behält seine Identität (auf Basis seiner MAC-Adresse): Eine
 Umbenennung in der App oder eine neue IP erzeugt nie ein Duplikat.
 
-Eine neue Animation aus der App hochgeladen? Starten Sie erneut eine Suche,
+Eine neue Animation aus der App hochgeladen? Starte erneut eine Suche,
 damit sie in der Liste **Szene** erscheint.
 
 ## Szenen (Gladys 5.1 und neuer)
@@ -81,8 +81,8 @@ reagiert eine Szene innerhalb von 30 s.
 | **Twinkly-Effekt abspielen**    | Twinkly, Effektnummer (1 = erster)                                       | `effect`                    |
 | **Modus eines Twinkly ändern**  | Twinkly, Modus: ein, aus, Animation, Effekt, Playlist, feste Farbe, Demo | `mode` (angewendet)         |
 
-Um Farbe und Helligkeit in einer Szene einzustellen, verwenden Sie die
-Standardaktion von Gladys „Gerät steuern“.
+Um Farbe und Helligkeit in einer Szene einzustellen, verwende die
+Standardaktion von Gladys „Gerätewert setzen“.
 
 ## Dashboard (Gladys 5.1 und neuer)
 
@@ -103,12 +103,12 @@ werden:
   | Modi              | Ein-/Ausschalten, **Abspielen…** (siehe unten) und bis zu 2 Modi: Animation, Playlist |
   | Farben            | Weiß, Rot, Grün, Blau (feste Farbe, Firmware 2.7.1+)                                  |
 
-  Eine Karte enthält höchstens 4 Schaltflächen: Fügen Sie das Widget mehrmals
+  Eine Karte enthält höchstens 4 Schaltflächen: Füge das Widget mehrmals
   hinzu, um mehrere Sätze zu erhalten. Die Szenen laufen in der Reihenfolge der
   Liste durch (Animationen, Playlist, Effekte). Die Helligkeit sinkt nicht unter
-  10 %: Zum Ausschalten verwenden Sie **Ausschalten**.
+  10 %: Zum Ausschalten verwende **Ausschalten**.
 
-  **Abspielen…** öffnet ein kleines Formular in der Karte: Wählen Sie in einer
+  **Abspielen…** öffnet ein kleines Formular in der Karte: Wähle in einer
   einzigen Liste, was abgespielt werden soll — einen Modus (Animation,
   Playlist, feste Farbe, Effekt, Demo), eine der aus der App hochgeladenen
   Animationen oder einen integrierten Effekt — und optional eine Helligkeit (10
@@ -117,12 +117,12 @@ werden:
 
 ## Fehlerbehebung
 
-- **„Noch kein Twinkly gefunden“**: Prüfen Sie, ob das Twinkly in der App
-  antwortet, und geben Sie dann seine IP unter **IP-Adressen** ein.
+- **„Noch kein Twinkly gefunden“**: Prüfe, ob das Twinkly in der App
+  antwortet, und gib dann seine IP unter **IP-Adressen** ein.
 - **Ein Twinkly wird „Nicht erreichbar“**: Es ist ausgesteckt, nicht im WLAN,
   oder seine IP hat sich geändert. Die Integration startet eine neue Suche
   (höchstens alle 5 Minuten). Eine feste IP vermeidet das Problem.
 - **Die Twinkly-App und Gladys gleichzeitig**: Das funktioniert. Wenn die App
   übernimmt, verbindet sich Gladys von selbst wieder.
-- Die Protokolle der Integration (Seite **Überwachung** in Gladys) zeigen, was
+- Die Protokolle der Integration (Reiter **Protokolle** in Gladys) zeigen, was
   gefunden wurde und was nicht antwortet.
