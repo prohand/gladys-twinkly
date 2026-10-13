@@ -38,12 +38,12 @@ src/twinkly/client.js       one device: token (login/verify), queued requests, /
 src/twinkly/discovery.js    UDP discovery payload + reply parser, mediated by the core
 src/twinkly/registry.js     known devices keyed by MAC: client, capabilities, last state
 src/twinkly/service.js      the behaviour: discover, poll, commands, triggers, identify, report
-src/twinkly/labels.js       bilingual names of the LED modes
+src/twinkly/labels.js       LED mode names, `{ en, fr, de, es }` text helpers
 src/devices/twinkly.js      Gladys device payload, features, scene options, states
 src/capabilities/scenes.js  scene trigger keys + scene action handlers (Gladys 5.1)
 src/capabilities/widget.js  the twinkly_overview dashboard widget (Gladys 5.1)
 gladys-assistant-integration.json   manifest
-docs/en.md, docs/fr.md      user documentation (mandatory, kept in sync)
+docs/{en,fr,de,es}.md       user documentation (en/fr mandatory; all four kept in sync)
 test/helpers/               fakeGladys (SDK), fakeTwinkly (fetch), setup (wired service)
 .github/scripts/changelog-release.mjs   rolls CHANGELOG.md during a release
 ```
@@ -80,8 +80,10 @@ test/helpers/               fakeGladys (SDK), fakeTwinkly (fetch), setup (wired 
 - **Changelog**: every user-visible change adds a line under `## [Unreleased]` in
   `CHANGELOG.md` (`### Added`, `Changed`, `Fixed`, `Removed`, `Security`). Never write a
   version heading: the Release workflow does it.
-- **Manifest texts** are `{ "en": ..., "fr": ... }` objects (label, description,
-  placeholder). The catalog description holds 10 to 100 characters per language.
+- **User-facing text is `{ en, fr, de, es }`**: manifest texts (label, description,
+  placeholder), action messages, connection status, widget texts and toasts. The catalog
+  description holds 10 to 100 characters per language. `docs/en.md`, `docs/fr.md`,
+  `docs/de.md`, `docs/es.md` stay in sync.
   `test/manifest.test.js` ties the manifest to the code: change both sides together.
 - **The container rootfs is read-only**: write only under `/data`. Never log tokens.
 - **Style**: Prettier formats, ESLint catches mistakes. Comments explain why, in

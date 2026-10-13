@@ -21,7 +21,7 @@
 
 import { createLogger, WIDGET_COLORS } from '@gladysassistant/integration-sdk';
 import { LED_MODES } from '../twinkly/client.js';
-import { modeLabel } from '../twinkly/labels.js';
+import { mapText, modeLabel, sameText } from '../twinkly/labels.js';
 import { FEATURES, PLAYLIST_SCENE, idsOf, sceneOptions } from '../devices/twinkly.js';
 import { BRIGHTNESS_STEP } from '../twinkly/service.js';
 
@@ -86,10 +86,10 @@ const MODE_BUTTONS = [LED_MODES.MOVIE, LED_MODES.PLAYLIST, LED_MODES.COLOR, LED_
 
 /** Colors of the "colors" set. */
 export const COLOR_PRESETS = [
-  { key: 'white', color: 0xffffff, label: { en: 'White', fr: 'Blanc' } },
-  { key: 'red', color: 0xff0000, label: { en: 'Red', fr: 'Rouge' } },
-  { key: 'green', color: 0x00ff00, label: { en: 'Green', fr: 'Vert' } },
-  { key: 'blue', color: 0x0000ff, label: { en: 'Blue', fr: 'Bleu' } },
+  { key: 'white', color: 0xffffff, label: { en: 'White', fr: 'Blanc', de: 'Weiß', es: 'Blanco' } },
+  { key: 'red', color: 0xff0000, label: { en: 'Red', fr: 'Rouge', de: 'Rot', es: 'Rojo' } },
+  { key: 'green', color: 0x00ff00, label: { en: 'Green', fr: 'Vert', de: 'Grün', es: 'Verde' } },
+  { key: 'blue', color: 0x0000ff, label: { en: 'Blue', fr: 'Bleu', de: 'Blau', es: 'Azul' } },
 ];
 
 /** The status component holds 10 rows at most. */
@@ -100,7 +100,7 @@ function deviceRow(entry) {
     return {
       label: entry.name,
       icon: 'wifi-off',
-      value: { en: 'Unreachable', fr: 'Injoignable' },
+      value: { en: 'Unreachable', fr: 'Injoignable', de: 'Nicht erreichbar', es: 'Inaccesible' },
       color: WIDGET_COLORS.DANGER,
     };
   }
@@ -108,7 +108,12 @@ function deviceRow(entry) {
     return {
       label: entry.name,
       icon: 'star',
-      value: { en: 'Not read yet', fr: 'Pas encore lu' },
+      value: {
+        en: 'Not read yet',
+        fr: 'Pas encore lu',
+        de: 'Noch nicht gelesen',
+        es: 'Aún no leído',
+      },
       color: WIDGET_COLORS.NEUTRAL,
     };
   }
@@ -120,22 +125,27 @@ function deviceRow(entry) {
   return {
     label: entry.name,
     icon: 'star',
-    value: { en: `${mode.en}${level}`, fr: `${mode.fr}${level}` },
+    value: mapText(mode, (text) => `${text}${level}`),
     color: WIDGET_COLORS.SUCCESS,
   };
 }
 
-/** `{ en, fr }` name of a scene select value, null when unknown. */
+/** Multi-language name of a scene select value, null when unknown. */
 export function sceneLabel(entry, value) {
   if (value === PLAYLIST_SCENE) {
-    return { en: 'Playlist', fr: 'Playlist' };
+    return modeLabel(LED_MODES.PLAYLIST);
   }
   if (String(value ?? '').startsWith('effect:')) {
     const n = Number(String(value).slice('effect:'.length)) + 1;
-    return { en: `Effect ${n}`, fr: `Effet ${n}` };
+    return effectLabel(n);
   }
   const option = sceneOptions(entry).find((o) => o.value === value);
-  return option ? { en: option.label, fr: option.label } : null;
+  return option ? sameText(option.label) : null;
+}
+
+/** Multi-language name of the effect numbered `n` (from 1). */
+function effectLabel(n) {
+  return { en: `Effect ${n}`, fr: `Effet ${n}`, de: `Effekt ${n}`, es: `Efecto ${n}` };
 }
 
 const actionButton = (key, label, icon, style = 'secondary') => ({
@@ -149,8 +159,17 @@ const actionButton = (key, label, icon, style = 'secondary') => ({
 /** On when off, off when on: one button for both, the content follows. */
 function toggleButton(entry) {
   return entry.lastMode === LED_MODES.OFF
-    ? actionButton(WIDGET_ACTIONS.TURN_ON, { en: 'Turn on', fr: 'Allumer' }, 'sun', 'primary')
-    : actionButton(WIDGET_ACTIONS.TURN_OFF, { en: 'Turn off', fr: 'Éteindre' }, 'moon');
+    ? actionButton(
+        WIDGET_ACTIONS.TURN_ON,
+        { en: 'Turn on', fr: 'Allumer', de: 'Einschalten', es: 'Encender' },
+        'sun',
+        'primary',
+      )
+    : actionButton(
+        WIDGET_ACTIONS.TURN_OFF,
+        { en: 'Turn off', fr: 'Éteindre', de: 'Ausschalten', es: 'Apagar' },
+        'moon',
+      );
 }
 
 function modeUsable(entry, mode) {
@@ -166,6 +185,9 @@ function modeUsable(entry, mode) {
   }
 }
 
+/** What precedes a movie name in the "Play…" select. */
+const MOVIE_PREFIX = { en: 'Movie: ', fr: 'Animation : ', de: 'Animation: ', es: 'Animación: ' };
+
 const clip = (text) =>
   text.length > MAX_OPTION_LABEL ? `${text.slice(0, MAX_OPTION_LABEL - 1)}…` : text;
 
@@ -174,7 +196,7 @@ const clip = (text) =>
  * the content is built (a form carries static options, never a `source`):
  * the modes it can play, then its movies and its effects. The playlist scene
  * is left out, the playlist mode already starts it.
- * @returns {Array<{value: string, label: {en: string, fr: string}}>}
+ * @returns {Array<{value: string, label: Record<string, string>}>}
  */
 export function playOptions(entry) {
   const modes = PLAY_MODES.filter((mode) => modeUsable(entry, mode)).map((mode) => ({
@@ -188,10 +210,10 @@ export function playOptions(entry) {
       if (option.value.startsWith('movie:')) {
         return {
           value: option.value,
-          label: { en: clip(`Movie: ${label.en}`), fr: clip(`Animation : ${label.fr}`) },
+          label: mapText(label, (text, lang) => clip(MOVIE_PREFIX[lang] + text)),
         };
       }
-      return { value: option.value, label: { en: clip(label.en), fr: clip(label.fr) } };
+      return { value: option.value, label: mapText(label, clip) };
     });
   return [...modes, ...scenes];
 }
@@ -206,7 +228,7 @@ function playButton(entry) {
       : options[0].value;
   return {
     type: 'button',
-    label: { en: 'Play…', fr: 'Jouer…' },
+    label: { en: 'Play…', fr: 'Jouer…', de: 'Abspielen…', es: 'Reproducir…' },
     icon: 'list',
     style: 'primary',
     action: {
@@ -215,7 +237,7 @@ function playButton(entry) {
         {
           key: PLAY_FIELDS.WHAT,
           type: 'select',
-          label: { en: 'What to play', fr: 'Que jouer' },
+          label: { en: 'What to play', fr: 'Que jouer', de: 'Was abspielen', es: 'Qué reproducir' },
           required: true,
           default: current,
           options,
@@ -224,8 +246,13 @@ function playButton(entry) {
           // No default: an empty field leaves the brightness as it is.
           key: PLAY_FIELDS.BRIGHTNESS,
           type: 'number',
-          label: { en: 'Brightness (%)', fr: 'Luminosité (%)' },
-          placeholder: { en: 'Unchanged', fr: 'Inchangée' },
+          label: {
+            en: 'Brightness (%)',
+            fr: 'Luminosité (%)',
+            de: 'Helligkeit (%)',
+            es: 'Brillo (%)',
+          },
+          placeholder: { en: 'Unchanged', fr: 'Inchangée', de: 'Unverändert', es: 'Sin cambios' },
           required: false,
           min: BRIGHTNESS_STEP,
           max: 100,
@@ -242,7 +269,11 @@ function buttonsOf(entry, set) {
         toggleButton(entry),
         actionButton(WIDGET_ACTIONS.BRIGHTNESS_DOWN, `− ${BRIGHTNESS_STEP} %`, 'minus'),
         actionButton(WIDGET_ACTIONS.BRIGHTNESS_UP, `+ ${BRIGHTNESS_STEP} %`, 'plus'),
-        actionButton(WIDGET_ACTIONS.BRIGHTNESS_MAX, { en: 'Max', fr: 'Max' }, 'sun'),
+        actionButton(
+          WIDGET_ACTIONS.BRIGHTNESS_MAX,
+          { en: 'Max', fr: 'Max', de: 'Max', es: 'Máx' },
+          'sun',
+        ),
       ];
     case BUTTON_SETS.MODES:
       return [
@@ -264,11 +295,19 @@ function buttonsOf(entry, set) {
         toggleButton(entry),
         actionButton(
           WIDGET_ACTIONS.PREVIOUS_SCENE,
-          { en: 'Previous', fr: 'Précédente' },
+          { en: 'Previous', fr: 'Précédente', de: 'Vorherige', es: 'Anterior' },
           'skip-back',
         ),
-        actionButton(WIDGET_ACTIONS.NEXT_SCENE, { en: 'Next', fr: 'Suivante' }, 'skip-forward'),
-        actionButton(WIDGET_ACTIONS.IDENTIFY, { en: 'Identify', fr: 'Identifier' }, 'eye'),
+        actionButton(
+          WIDGET_ACTIONS.NEXT_SCENE,
+          { en: 'Next', fr: 'Suivante', de: 'Nächste', es: 'Siguiente' },
+          'skip-forward',
+        ),
+        actionButton(
+          WIDGET_ACTIONS.IDENTIFY,
+          { en: 'Identify', fr: 'Identifier', de: 'Identifizieren', es: 'Identificar' },
+          'eye',
+        ),
       ];
   }
 }
@@ -277,22 +316,34 @@ const hex = (color) => `#${Number(color).toString(16).padStart(6, '0')}`;
 
 function detailRows(entry) {
   const rows = [deviceRow(entry)];
-  rows[0] = { ...rows[0], label: { en: 'State', fr: 'État' } };
+  rows[0] = { ...rows[0], label: { en: 'State', fr: 'État', de: 'Zustand', es: 'Estado' } };
   const scene = entry.lastMode === LED_MODES.OFF ? null : sceneLabel(entry, entry.lastScene);
   if (scene) {
-    rows.push({ label: { en: 'Scene', fr: 'Scène' }, icon: 'film', value: scene });
+    rows.push({
+      label: { en: 'Scene', fr: 'Scène', de: 'Szene', es: 'Escena' },
+      icon: 'film',
+      value: scene,
+    });
   }
   if (entry.hasColor && entry.lastColor !== null && entry.lastColor !== undefined) {
     rows.push({
-      label: { en: 'Color', fr: 'Couleur' },
+      label: { en: 'Color', fr: 'Couleur', de: 'Farbe', es: 'Color' },
       icon: 'droplet',
       value: hex(entry.lastColor),
     });
   }
-  rows.push({ label: { en: 'IP address', fr: 'Adresse IP' }, icon: 'wifi', value: entry.host });
-  rows.push({ label: { en: 'LEDs', fr: 'LED' }, icon: 'zap', value: entry.ledCount ?? 0 });
+  rows.push({
+    label: { en: 'IP address', fr: 'Adresse IP', de: 'IP-Adresse', es: 'Dirección IP' },
+    icon: 'wifi',
+    value: entry.host,
+  });
+  rows.push({
+    label: { en: 'LEDs', fr: 'LED', de: 'LEDs', es: 'LED' },
+    icon: 'zap',
+    value: entry.ledCount ?? 0,
+  });
   if (entry.firmware) {
-    rows.push({ label: { en: 'Firmware', fr: 'Firmware' }, icon: 'cpu', value: entry.firmware });
+    rows.push({ label: sameText('Firmware'), icon: 'cpu', value: entry.firmware });
   }
   return rows;
 }
@@ -309,6 +360,8 @@ export function buildDeviceView(service, settings) {
           text: {
             en: 'This Twinkly is not found on the network yet.',
             fr: "Ce Twinkly n'est pas encore trouvé sur le réseau.",
+            de: 'Dieses Twinkly wurde noch nicht im Netzwerk gefunden.',
+            es: 'Este Twinkly aún no se ha encontrado en la red.',
           },
         },
       ],
@@ -320,7 +373,7 @@ export function buildDeviceView(service, settings) {
     // Device-bound: follows the published states live, no nudge needed.
     {
       type: 'gauge',
-      label: { en: 'Brightness', fr: 'Luminosité' },
+      label: { en: 'Brightness', fr: 'Luminosité', de: 'Helligkeit', es: 'Brillo' },
       device_feature: ids.feature(FEATURES.BRIGHTNESS),
       unit: '%',
     },
@@ -333,6 +386,8 @@ export function buildDeviceView(service, settings) {
       text: {
         en: 'No solid color on this Twinkly (firmware too old).',
         fr: 'Pas de couleur fixe sur ce Twinkly (firmware trop ancien).',
+        de: 'Keine feste Farbe auf diesem Twinkly (Firmware zu alt).',
+        es: 'Este Twinkly no tiene color fijo (firmware demasiado antiguo).',
       },
     });
   }
@@ -362,6 +417,8 @@ export function buildOverview(service, settings = {}) {
           text: {
             en: 'No Twinkly found yet. Open the integration configuration to add one.',
             fr: "Aucun Twinkly trouvé. Ouvrez la configuration de l'intégration pour en ajouter un.",
+            de: 'Noch kein Twinkly gefunden. Öffnen Sie die Konfiguration der Integration, um eines hinzuzufügen.',
+            es: 'Todavía no se ha encontrado ningún Twinkly. Abra la configuración de la integración para añadir uno.',
           },
         },
       ],
@@ -375,14 +432,14 @@ export function buildOverview(service, settings = {}) {
       { type: 'status', items: entries.slice(0, MAX_ROWS).map(deviceRow) },
       {
         type: 'button',
-        label: { en: 'All on', fr: 'Tout allumer' },
+        label: { en: 'All on', fr: 'Tout allumer', de: 'Alle ein', es: 'Encender todo' },
         icon: 'sun',
         style: 'primary',
         action: { key: WIDGET_ACTIONS.ALL_ON },
       },
       {
         type: 'button',
-        label: { en: 'All off', fr: 'Tout éteindre' },
+        label: { en: 'All off', fr: 'Tout éteindre', de: 'Alle aus', es: 'Apagar todo' },
         icon: 'moon',
         style: 'secondary',
         action: { key: WIDGET_ACTIONS.ALL_OFF },
@@ -397,11 +454,23 @@ async function runAllAction(service, on) {
     return {
       en: `${done} Twinkly done, ${failed} did not answer.`,
       fr: `${done} Twinkly fait(s), ${failed} sans réponse.`,
+      de: `${done} Twinkly erledigt, ${failed} ohne Antwort.`,
+      es: `${done} Twinkly hecho(s), ${failed} sin respuesta.`,
     };
   }
   return on
-    ? { en: `${done} Twinkly on.`, fr: `${done} Twinkly allumé(s).` }
-    : { en: `${done} Twinkly off.`, fr: `${done} Twinkly éteint(s).` };
+    ? {
+        en: `${done} Twinkly on.`,
+        fr: `${done} Twinkly allumé(s).`,
+        de: `${done} Twinkly eingeschaltet.`,
+        es: `${done} Twinkly encendido(s).`,
+      }
+    : {
+        en: `${done} Twinkly off.`,
+        fr: `${done} Twinkly éteint(s).`,
+        de: `${done} Twinkly ausgeschaltet.`,
+        es: `${done} Twinkly apagado(s).`,
+      };
 }
 
 const modeOfAction = (actionKey) =>
@@ -421,6 +490,8 @@ async function runPlayAction(service, device, values) {
     return {
       en: 'This button needs Gladys 5.2 or later. Use the mode buttons meanwhile.',
       fr: "Ce bouton demande Gladys 5.2 ou plus. Utilisez les boutons de mode d'ici là.",
+      de: 'Diese Schaltfläche erfordert Gladys 5.2 oder neuer. Verwenden Sie bis dahin die Modus-Schaltflächen.',
+      es: 'Este botón requiere Gladys 5.2 o posterior. Mientras tanto, utilice los botones de modo.',
     };
   }
   const what = values[PLAY_FIELDS.WHAT];
@@ -434,10 +505,10 @@ async function runPlayAction(service, device, values) {
     label = modeLabel(applied);
   } else if (what.startsWith('effect:')) {
     const number = await service.playEffect(device, Number(what.slice('effect:'.length)) + 1);
-    label = { en: `Effect ${number}`, fr: `Effet ${number}` };
+    label = effectLabel(number);
   } else {
     const scene = await service.playScene(device, what);
-    label = choice?.label ?? { en: scene.label, fr: scene.label };
+    label = choice?.label ?? sameText(scene.label);
   }
   const brightness = values[PLAY_FIELDS.BRIGHTNESS];
   // Raising the level of a Twinkly that is off turns it on: only a device
@@ -447,9 +518,21 @@ async function runPlayAction(service, device, values) {
     return {
       en: `Playing ${label.en} at ${level} %.`,
       fr: `Lecture : ${label.fr} à ${level} %.`,
+      de: `Wiedergabe: ${label.de} bei ${level} %.`,
+      es: `Reproduciendo: ${label.es} al ${level} %.`,
     };
   }
-  return { en: `Playing ${label.en}.`, fr: `Lecture : ${label.fr}.` };
+  return playingText(label);
+}
+
+/** The toast of a scene or mode that now plays. */
+function playingText(label) {
+  return {
+    en: `Playing ${label.en}.`,
+    fr: `Lecture : ${label.fr}.`,
+    de: `Wiedergabe: ${label.de}.`,
+    es: `Reproduciendo: ${label.es}.`,
+  };
 }
 
 /** A button of a one-device card, on the device of the instance settings. */
@@ -463,12 +546,22 @@ async function runDeviceAction(service, actionKey, device, values) {
   const mode = modeOfAction(actionKey);
   if (mode) {
     const label = modeLabel(await service.applyMode(device, mode));
-    return { en: `Mode: ${label.en}.`, fr: `Mode : ${label.fr}.` };
+    return {
+      en: `Mode: ${label.en}.`,
+      fr: `Mode : ${label.fr}.`,
+      de: `Modus: ${label.de}.`,
+      es: `Modo: ${label.es}.`,
+    };
   }
   const preset = presetOfAction(actionKey);
   if (preset) {
     await service.setColor(device, preset.color);
-    return { en: `Color: ${preset.label.en}.`, fr: `Couleur : ${preset.label.fr}.` };
+    return {
+      en: `Color: ${preset.label.en}.`,
+      fr: `Couleur : ${preset.label.fr}.`,
+      de: `Farbe: ${preset.label.de}.`,
+      es: `Color: ${preset.label.es}.`,
+    };
   }
   switch (actionKey) {
     case WIDGET_ACTIONS.TURN_ON:
@@ -476,8 +569,18 @@ async function runDeviceAction(service, actionKey, device, values) {
       const on = actionKey === WIDGET_ACTIONS.TURN_ON;
       await service.applyMode(device, on ? 'on' : LED_MODES.OFF);
       return on
-        ? { en: 'Twinkly on.', fr: 'Twinkly allumé.' }
-        : { en: 'Twinkly off.', fr: 'Twinkly éteint.' };
+        ? {
+            en: 'Twinkly on.',
+            fr: 'Twinkly allumé.',
+            de: 'Twinkly eingeschaltet.',
+            es: 'Twinkly encendido.',
+          }
+        : {
+            en: 'Twinkly off.',
+            fr: 'Twinkly éteint.',
+            de: 'Twinkly ausgeschaltet.',
+            es: 'Twinkly apagado.',
+          };
     }
     case WIDGET_ACTIONS.PREVIOUS_SCENE:
     case WIDGET_ACTIONS.NEXT_SCENE: {
@@ -486,11 +589,8 @@ async function runDeviceAction(service, actionKey, device, values) {
         actionKey === WIDGET_ACTIONS.NEXT_SCENE ? 1 : -1,
       );
       const entry = service.entryByExternalId(device);
-      const label = (entry && sceneLabel(entry, scene.value)) ?? {
-        en: scene.label,
-        fr: scene.label,
-      };
-      return { en: `Playing ${label.en}.`, fr: `Lecture : ${label.fr}.` };
+      const label = (entry && sceneLabel(entry, scene.value)) ?? sameText(scene.label);
+      return playingText(label);
     }
     case WIDGET_ACTIONS.IDENTIFY:
       return service.identify(device);
@@ -504,7 +604,12 @@ async function runDeviceAction(service, actionKey, device, values) {
               device,
               actionKey === WIDGET_ACTIONS.BRIGHTNESS_UP ? BRIGHTNESS_STEP : -BRIGHTNESS_STEP,
             );
-      return { en: `Brightness ${level} %.`, fr: `Luminosité ${level} %.` };
+      return {
+        en: `Brightness ${level} %.`,
+        fr: `Luminosité ${level} %.`,
+        de: `Helligkeit ${level} %.`,
+        es: `Brillo ${level} %.`,
+      };
     }
     default:
       throw new Error(`Unknown widget action: ${actionKey}`);

@@ -67,6 +67,8 @@ test('nothing found: the status says what to do', async () => {
   await service.publishConnectionStatus();
   assert.equal(gladys.connectionStatuses[0].connected, false);
   assert.match(gladys.connectionStatuses[0].message.fr, /adresse IP/);
+  assert.match(gladys.connectionStatuses[0].message.de, /IP-Adresse/);
+  assert.match(gladys.connectionStatuses[0].message.es, /dirección IP/);
 });
 
 test('poll publishes the state', async () => {
@@ -300,7 +302,7 @@ test('a lost device triggers a rediscovery, not more than every five minutes', a
   assert.equal(scans, 1);
 });
 
-test('test the connection: a report in both languages', async () => {
+test('test the connection: a report in every language', async () => {
   const { service, gladys } = setup({
     devices: { '192.168.1.40': makeDevice() },
     config: { hosts: '192.168.1.40, 192.168.1.99', auto_discovery: true },
@@ -310,5 +312,8 @@ test('test the connection: a report in both languages', async () => {
   assert.match(report.en, /Network scan unavailable \(HTTP 403\)/);
   assert.match(report.en, /192\.168\.1\.40, 250 LEDs fw 2\.8\.3\): Movie\./);
   assert.match(report.fr, /192\.168\.1\.99 : pas de réponse\./);
+  assert.match(report.de, /Netzwerksuche nicht verfügbar \(HTTP 403\)/);
+  assert.match(report.de, /250 LEDs fw 2\.8\.3\): Animation\./);
+  assert.match(report.es, /192\.168\.1\.99: sin respuesta\./);
   assert.equal(gladys.discovered.length, 1);
 });

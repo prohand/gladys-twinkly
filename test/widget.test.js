@@ -11,6 +11,7 @@ import {
   buildOverview,
   refreshWidgets,
 } from '../src/capabilities/widget.js';
+import { LANGUAGES } from '../src/twinkly/labels.js';
 import { makeDevice } from './helpers/fakeTwinkly.js';
 import { gladysDevice, setup } from './helpers/setup.js';
 
@@ -67,6 +68,8 @@ test('the buttons switch everything and answer with a toast', async () => {
   assert.deepEqual(await widget.action(service, { actionKey: WIDGET_ACTIONS.ALL_OFF }), {
     en: '1 Twinkly off.',
     fr: '1 Twinkly éteint(s).',
+    de: '1 Twinkly ausgeschaltet.',
+    es: '1 Twinkly apagado(s).',
   });
   assert.equal(device.mode, 'off');
   await widget.action(service, { actionKey: WIDGET_ACTIONS.ALL_ON });
@@ -127,6 +130,8 @@ test('the on/off button follows the device state', async () => {
   assert.deepEqual(await tap(WIDGET_ACTIONS.TURN_OFF), {
     en: 'Twinkly off.',
     fr: 'Twinkly éteint.',
+    de: 'Twinkly ausgeschaltet.',
+    es: 'Twinkly apagado.',
   });
   assert.equal(device.mode, 'off');
   assert.equal(buttonsOf(get())[0].action.key, WIDGET_ACTIONS.TURN_ON);
@@ -246,7 +251,12 @@ test('the "Play…" form lists the modes, movies and effects of the device', asy
       'effect:4',
     ],
   );
-  assert.deepEqual(what.options[5].label, { en: 'Movie: Snowfall', fr: 'Animation : Snowfall' });
+  assert.deepEqual(what.options[5].label, {
+    en: 'Movie: Snowfall',
+    fr: 'Animation : Snowfall',
+    de: 'Animation: Snowfall',
+    es: 'Animación: Snowfall',
+  });
   // Pre-filled with what plays now.
   assert.equal(what.default, 'movie:aaa-111');
   assert.equal(brightness.key, PLAY_FIELDS.BRIGHTNESS);
@@ -293,7 +303,12 @@ test('the form plays an effect, a movie or a mode, with the brightness', async (
       [PLAY_FIELDS.WHAT]: 'effect:2',
       [PLAY_FIELDS.BRIGHTNESS]: 40,
     }),
-    { en: 'Playing Effect 3 at 40 %.', fr: 'Lecture : Effet 3 à 40 %.' },
+    {
+      en: 'Playing Effect 3 at 40 %.',
+      fr: 'Lecture : Effet 3 à 40 %.',
+      de: 'Wiedergabe: Effekt 3 bei 40 %.',
+      es: 'Reproduciendo: Efecto 3 al 40 %.',
+    },
   );
   assert.equal(device.mode, 'effect');
   assert.equal(device.currentEffect, 2);
@@ -339,4 +354,47 @@ test('an older core that dropped the form gets an explanation, nothing plays', a
   }
   assert.equal(device.mode, 'movie');
   assert.equal(device.currentMovie, 0);
+});
+
+// Every multi-language object of a content or a toast, with where it is.
+function languageObjects(node, path = 'content', found = []) {
+  if (Array.isArray(node)) {
+    node.forEach((child, i) => languageObjects(child, `${path}[${i}]`, found));
+  } else if (node && typeof node === 'object') {
+    if (typeof node.en === 'string') {
+      found.push({ path, value: node });
+    } else {
+      for (const [key, value] of Object.entries(node)) {
+        languageObjects(value, `${path}.${key}`, found);
+      }
+    }
+  }
+  return found;
+}
+
+test('every text of the cards and toasts is in English, French, German and Spanish', async () => {
+  const { get, tap, service } = await oneDevice();
+  const contents = [
+    ...[...Object.values(BUTTON_SETS), undefined].map((set) => get(set)),
+    buildOverview(service),
+    buildOverview(setup().service),
+    WIDGETS[OVERVIEW_WIDGET].get(service, { settings: { device: 'missing' } }),
+    await tap(WIDGET_ACTIONS.NEXT_SCENE),
+    await tap(WIDGET_ACTIONS.BRIGHTNESS_UP),
+    await tap('mode_effect'),
+    await tap('color_red'),
+    await tap(WIDGET_ACTIONS.PLAY, {
+      [PLAY_FIELDS.WHAT]: 'effect:1',
+      [PLAY_FIELDS.BRIGHTNESS]: 50,
+    }),
+    await tap(WIDGET_ACTIONS.PLAY),
+  ];
+  const found = languageObjects(contents);
+  assert.ok(found.length > 20);
+  for (const { path, value } of found) {
+    assert.deepEqual(Object.keys(value).sort(), [...LANGUAGES].sort(), path);
+    for (const lang of LANGUAGES) {
+      assert.ok(value[lang], `${path}.${lang}`);
+    }
+  }
 });

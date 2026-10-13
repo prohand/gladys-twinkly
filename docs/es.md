@@ -1,0 +1,125 @@
+# Twinkly
+
+Esta integración conecta Gladys con sus luces LED inteligentes **Twinkly**
+(guirnaldas, cortinas, árboles, Squares, Flex, Dots…). Gladys las controla
+**en local**, en su propia red: sin cuenta, sin nube.
+
+## Antes de empezar
+
+- Configure primero cada Twinkly con la **aplicación Twinkly** y conéctelo a su
+  Wi-Fi.
+- Debe estar en la **misma red** que Gladys.
+- Gladys **5.2** o posterior.
+- Recomendado: asígnele una **IP fija** (reserva DHCP en su router). Si su IP
+  cambia, la integración lo vuelve a encontrar, pero más despacio.
+
+Twinkly no tiene API pública en la nube: todo pasa por la red local
+(transporte **local**).
+
+## Configuración
+
+| Campo                          | Qué hace                                                                                                |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| **Direcciones IP**             | Direcciones IP de sus dispositivos Twinkly, separadas por comas. Opcional si la búsqueda los encuentra. |
+| **Búsqueda en la red**         | Busca dispositivos Twinkly en la red (difusión UDP, puerto 5555). Activada por defecto.                 |
+| **Intervalo de actualización** | Frecuencia de lectura de cada Twinkly: 10 s, 15 s, 30 s o 1 min.                                        |
+| **Al encender, reproducir**    | Lo que muestra un Twinkly cuando Gladys lo enciende (por defecto: lo último que reproducía).            |
+
+**Probar la conexión** busca los dispositivos Twinkly y enumera los que
+responden: nombre, dirección, número de LED, versión de firmware, modo actual.
+
+**Identificar un Twinkly** reproduce su demo durante 5 segundos y luego lo deja
+como estaba: práctico para saber cuál es cuál.
+
+### ¿La búsqueda en la red no encuentra nada?
+
+El contenedor de la integración no ve las difusiones de red: Gladys envía la
+búsqueda por él. Algunas redes la bloquean (VLAN separadas, aislamiento de
+clientes Wi-Fi). En ese caso, introduzca simplemente las **direcciones IP**.
+
+## Añadir los dispositivos
+
+En **Integraciones → Twinkly → Descubrir**, lance una búsqueda y añada cada
+Twinkly. Cada uno se convierte en una luz con:
+
+| Función    | Qué hace                                                                                         |
+| ---------- | ------------------------------------------------------------------------------------------------ |
+| **On/Off** | Apagado (modo `off`) o encendido de nuevo (véase «Al encender, reproducir»).                     |
+| **Brillo** | De 0 a 100 %. Subir el brillo de un Twinkly apagado lo enciende.                                 |
+| **Color**  | Color fijo (firmware 2.7.1 o posterior).                                                         |
+| **Escena** | Las animaciones cargadas desde la aplicación, la lista de reproducción y los efectos integrados. |
+
+El dispositivo conserva su identidad (basada en su dirección MAC): cambiarle el
+nombre en la aplicación o una nueva IP nunca crea un duplicado.
+
+¿Ha cargado una nueva animación desde la aplicación? Vuelva a lanzar una
+búsqueda para que aparezca en la lista **Escena**.
+
+## Escenas (Gladys 5.1 y posterior)
+
+### Activadores
+
+| Activador                          | Cuándo                                                                                    | Variables                              |
+| ---------------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------- |
+| **Un Twinkly ha cambiado de modo** | El modo ha cambiado **fuera de Gladys**: la aplicación, su botón, su propio temporizador. | `device_name`, `mode`, `previous_mode` |
+| **Un Twinkly no está accesible**   | Ha dejado de responder (desenchufado, Wi-Fi perdido…).                                    | `device_name`                          |
+| **Un Twinkly vuelve a responder**  | Vuelve a responder.                                                                       | `device_name`                          |
+
+Un cambio ordenado por Gladys nunca activa «ha cambiado de modo»: una escena no
+puede entrar en bucle.
+
+Los cambios se detectan en cada lectura: con un intervalo de 30 s, una escena
+reacciona en menos de 30 s.
+
+### Acciones
+
+| Acción                                  | Parámetros                                                                                    | Salida                       |
+| --------------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------- |
+| **Reproducir una animación de Twinkly** | Twinkly, nombre de la animación (o número: 1 = la primera)                                    | `movie` (nombre reproducido) |
+| **Reproducir un efecto de Twinkly**     | Twinkly, número del efecto (1 = el primero)                                                   | `effect`                     |
+| **Cambiar el modo de un Twinkly**       | Twinkly, modo: encendido, apagado, animación, efecto, lista de reproducción, color fijo, demo | `mode` (aplicado)            |
+
+Para ajustar el color y el brillo en una escena, utilice la acción estándar de
+Gladys «Controlar un dispositivo».
+
+## Panel (Gladys 5.1 y posterior)
+
+El widget **Twinkly** tiene dos vistas, que se eligen en su configuración:
+
+- **Ningún Twinkly elegido**: una fila por dispositivo (lo que reproduce y con
+  qué brillo, o «Inaccesible») y dos botones: **Encender todo** y
+  **Apagar todo**.
+- **Un Twinkly elegido**: su brillo en directo, su estado, la escena en curso,
+  su color, dirección IP, número de LED y firmware, y un juego de botones (el
+  ajuste **Botones**):
+
+  | Botones               | Qué hacen                                                                                            |
+  | --------------------- | ---------------------------------------------------------------------------------------------------- |
+  | Escenas (por defecto) | Encender/apagar, escena anterior, escena siguiente, Identificar                                      |
+  | Brillo                | Encender/apagar, −10 %, +10 %, Máx                                                                   |
+  | Modos                 | Encender/apagar, **Reproducir…** (véase más abajo) y hasta 2 modos: animación, lista de reproducción |
+  | Colores               | Blanco, rojo, verde, azul (color fijo, firmware 2.7.1+)                                              |
+
+  Una tarjeta contiene 4 botones como máximo: añada el widget varias veces para
+  obtener varios juegos. Las escenas se recorren en el orden de la lista
+  (animaciones, lista de reproducción, efectos). El brillo no baja de 10 %: para
+  apagar, utilice **Apagar**.
+
+  **Reproducir…** abre un pequeño formulario en la tarjeta: elija qué
+  reproducir en una sola lista — un modo (animación, lista de reproducción,
+  color fijo, efecto, demo), una de las animaciones cargadas desde la aplicación
+  o un efecto integrado — y, opcionalmente, un brillo (de 10 a 100 %; déjelo
+  vacío para conservar el actual). Viene rellenado con lo que el Twinkly
+  reproduce en ese momento.
+
+## Solución de problemas
+
+- **«Todavía no se ha encontrado ningún Twinkly»**: compruebe que el Twinkly
+  responde en la aplicación y luego introduzca su IP en **Direcciones IP**.
+- **Un Twinkly pasa a «Inaccesible»**: está desenchufado, fuera del Wi-Fi, o su
+  IP ha cambiado. La integración lanza una nueva búsqueda (como máximo una vez
+  cada 5 minutos). Una IP fija evita el problema.
+- **La aplicación Twinkly y Gladys a la vez**: funciona. Cuando la aplicación
+  toma el control, Gladys se vuelve a conectar por sí sola.
+- Los registros de la integración (la página **Supervisión** de Gladys) indican
+  lo que se ha encontrado y lo que no responde.

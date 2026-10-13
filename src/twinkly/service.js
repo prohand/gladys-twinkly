@@ -18,7 +18,7 @@ import { normalizeConfig, TURN_ON_MODES } from '../config.js';
 import { LED_MODES, TwinklyError, intToRgb } from './client.js';
 import { scanForTwinkly } from './discovery.js';
 import { TwinklyRegistry } from './registry.js';
-import { modeLabel } from './labels.js';
+import { joinTexts, modeLabel } from './labels.js';
 import {
   FEATURES,
   buildDevice,
@@ -146,6 +146,8 @@ export class TwinklyService {
       await this.gladys.setConnectionStatus(false, {
         en: 'No Twinkly found yet: type its IP address in the configuration, or run a scan.',
         fr: 'Aucun Twinkly trouvé : saisissez son adresse IP dans la configuration, ou lancez une recherche.',
+        de: 'Noch kein Twinkly gefunden: Geben Sie seine IP-Adresse in der Konfiguration ein oder starten Sie eine Suche.',
+        es: 'Todavía no se ha encontrado ningún Twinkly: introduzca su dirección IP en la configuración o inicie una búsqueda.',
       });
       return;
     }
@@ -155,6 +157,8 @@ export class TwinklyService {
       await this.gladys.setConnectionStatus(false, {
         en: `Unreachable: ${names}.`,
         fr: `Injoignable : ${names}.`,
+        de: `Nicht erreichbar: ${names}.`,
+        es: `Inaccesible: ${names}.`,
       });
       return;
     }
@@ -603,7 +607,7 @@ export class TwinklyService {
   /**
    * Make one device signal itself: demo mode for a few seconds, then back to
    * what it was doing (off included).
-   * @returns {Promise<{en: string, fr: string}>} message for the user
+   * @returns {Promise<Record<string, string>>} `{ en, fr, de, es }` message for the user
    */
   async identify(externalId) {
     const entry = await this.ensureEntry(externalId);
@@ -611,6 +615,8 @@ export class TwinklyService {
       return {
         en: 'This Twinkly does not answer on the network.',
         fr: 'Ce Twinkly ne répond pas sur le réseau.',
+        de: 'Dieses Twinkly antwortet nicht im Netzwerk.',
+        es: 'Este Twinkly no responde en la red.',
       };
     }
     const before = await this.talk(entry, () => entry.client.getMode());
@@ -626,14 +632,16 @@ export class TwinklyService {
     return {
       en: `${entry.name} played its demo for ${IDENTIFY_MS / 1000} seconds.`,
       fr: `${entry.name} a joué sa démo pendant ${IDENTIFY_MS / 1000} secondes.`,
+      de: `${entry.name} hat ${IDENTIFY_MS / 1000} Sekunden lang seine Demo abgespielt.`,
+      es: `${entry.name} ha reproducido su demo durante ${IDENTIFY_MS / 1000} segundos.`,
     };
   }
 
   // --- "Test the connection" ----------------------------------------------------
 
   /**
-   * Run a discovery and say, in both languages, what answered.
-   * @returns {Promise<{en: string, fr: string}>}
+   * Run a discovery and say, in every language, what answered.
+   * @returns {Promise<Record<string, string>>} `{ en, fr, de, es }`
    */
   async testConnection() {
     const result = await this.discover();
@@ -642,32 +650,53 @@ export class TwinklyService {
     await this.publishConnectionStatus();
     this.onChange();
 
-    const en = [];
-    const fr = [];
+    const lines = [];
     if (result.scanned) {
       if (result.scanError) {
-        en.push(`Network scan unavailable (${result.scanError}): type the IP addresses.`);
-        fr.push(`Recherche réseau indisponible (${result.scanError}) : saisissez les adresses IP.`);
+        const error = result.scanError;
+        lines.push({
+          en: `Network scan unavailable (${error}): type the IP addresses.`,
+          fr: `Recherche réseau indisponible (${error}) : saisissez les adresses IP.`,
+          de: `Netzwerksuche nicht verfügbar (${error}): Geben Sie die IP-Adressen ein.`,
+          es: `Búsqueda en la red no disponible (${error}): introduzca las direcciones IP.`,
+        });
       } else {
-        en.push('Network scan done.');
-        fr.push('Recherche réseau effectuée.');
+        lines.push({
+          en: 'Network scan done.',
+          fr: 'Recherche réseau effectuée.',
+          de: 'Netzwerksuche durchgeführt.',
+          es: 'Búsqueda en la red realizada.',
+        });
       }
     }
     if (result.found.length === 0) {
-      en.push('No Twinkly answered.');
-      fr.push("Aucun Twinkly n'a répondu.");
+      lines.push({
+        en: 'No Twinkly answered.',
+        fr: "Aucun Twinkly n'a répondu.",
+        de: 'Kein Twinkly hat geantwortet.',
+        es: 'Ningún Twinkly ha respondido.',
+      });
     }
     for (const entry of result.found) {
       const mode = await entry.client.getMode().catch(() => null);
-      const label = mode ? modeLabel(mode) : { en: '?', fr: '?' };
+      const label = mode ? modeLabel(mode) : { en: '?', fr: '?', de: '?', es: '?' };
       const fw = entry.firmware ? ` fw ${entry.firmware}` : '';
-      en.push(`${entry.name} (${entry.host}, ${entry.ledCount} LEDs${fw}): ${label.en}.`);
-      fr.push(`${entry.name} (${entry.host}, ${entry.ledCount} LED${fw}) : ${label.fr}.`);
+      const where = `${entry.name} (${entry.host}, ${entry.ledCount}`;
+      lines.push({
+        en: `${where} LEDs${fw}): ${label.en}.`,
+        fr: `${where} LED${fw}) : ${label.fr}.`,
+        de: `${where} LEDs${fw}): ${label.de}.`,
+        es: `${where} LED${fw}): ${label.es}.`,
+      });
     }
     for (const failure of result.failed) {
-      en.push(`${failure.host}: no answer.`);
-      fr.push(`${failure.host} : pas de réponse.`);
+      lines.push({
+        en: `${failure.host}: no answer.`,
+        fr: `${failure.host} : pas de réponse.`,
+        de: `${failure.host}: keine Antwort.`,
+        es: `${failure.host}: sin respuesta.`,
+      });
     }
-    return { en: en.join(' '), fr: fr.join(' ') };
+    return joinTexts(lines);
   }
 }
