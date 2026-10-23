@@ -10,6 +10,10 @@ the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-10-23
+
+- Maintenance release, no functional change.
+
 ## [1.2.0] - 2026-10-13
 
 ### Added
@@ -55,7 +59,8 @@ the version's GitHub Release.
   color, IP, LEDs, firmware, and a set of buttons picked in its settings (on/off,
   previous/next scene, identify; brightness −/+/max; modes; solid colors).
 
-[Unreleased]: https://github.com/prohand/gladys-twinkly/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/prohand/gladys-twinkly/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/prohand/gladys-twinkly/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/prohand/gladys-twinkly/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/prohand/gladys-twinkly/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/prohand/gladys-twinkly/releases/tag/v1.0.1

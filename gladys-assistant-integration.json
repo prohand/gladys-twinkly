@@ -8,8 +8,8 @@
     "de": "Steuere deine Twinkly-LED-Lichter über dein lokales Netzwerk.",
     "es": "Controle sus luces LED inteligentes Twinkly a través de su red local."
   },
-  "version": "1.2.0",
-  "docker_image": "ghcr.io/prohand/gladys-twinkly:1.2.0",
+  "version": "1.2.1",
+  "docker_image": "ghcr.io/prohand/gladys-twinkly:1.2.1",
   "gladys_version": ">=5.2.0",
   "cover_image": "https://raw.githubusercontent.com/prohand/gladys-twinkly/main/cover.png",
   "categories": ["lighting"],
