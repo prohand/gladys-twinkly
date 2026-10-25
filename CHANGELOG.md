@@ -10,6 +10,20 @@ the version's GitHub Release.
 
 ## [Unreleased]
 
+### Added
+
+- Search keywords for the Gladys catalog (Christmas lights, Christmas tree, string
+  lights, LED strip, xled…).
+
+### Changed
+
+- Gladys 5.3.0 or later is now required (catalog keywords).
+- Gladys integration SDK 0.16.
+- A poll only sends Gladys the values that changed, plus every value every 30
+  minutes; the read that follows a Gladys order is still sent whole.
+- The Release workflow runs the full store admission checks once the image is
+  published.
+
 ## [1.2.1] - 2026-10-23
 
 - Maintenance release, no functional change.

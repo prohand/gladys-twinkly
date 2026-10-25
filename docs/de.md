@@ -9,7 +9,7 @@ Diese Integration verbindet Gladys mit deinen **Twinkly**-LED-Lichtern
 - Richte jedes Twinkly zuerst mit der **Twinkly-App** ein und verbinde es mit
   deinem WLAN.
 - Es muss sich im **selben Netzwerk** wie Gladys befinden.
-- Gladys **5.2** oder neuer.
+- Gladys **5.3** oder neuer.
 - Empfohlen: Gib ihm eine **feste IP** (DHCP-Reservierung in deinem
   Router). Ändert sich seine IP, findet die Integration es wieder, aber
   langsamer.

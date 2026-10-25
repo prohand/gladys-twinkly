@@ -30,6 +30,9 @@ import {
 } from '../devices/twinkly.js';
 import { SCENE_TRIGGERS, SET_MODE_VALUES, fireTrigger } from '../capabilities/scenes.js';
 
+/** An unchanged value is still re-sent this often, so Gladys never shows it as stale. */
+export const STATE_HEARTBEAT_MS = 30 * 60 * 1000;
+
 const logger = createLogger({ name: 'twinkly' });
 
 /** Never re-run a discovery for a lost device more often than this. */
@@ -279,11 +282,23 @@ export class TwinklyService {
     }
   }
 
-  async publishEntryState(entry, state) {
+  /**
+   * Publish what the device reported. A poll only sends the values that
+   * changed (Gladys takes 300 states a minute, and a fleet polled every few
+   * seconds would spend it on copies), plus every value once per
+   * `STATE_HEARTBEAT_MS` so a stable one stays recently dated. After a Gladys
+   * order (`force`), everything is sent: the dashboard showed the value the
+   * user asked for, and only the device's own answer may confirm or undo it.
+   */
+  async publishEntryState(entry, state, { force = false } = {}) {
     const states = statesOf(this.gladys, entry, state);
-    if (states.length > 0) {
-      await this.gladys.publishStates(states);
+    if (states.length === 0) {
+      return;
     }
+    if (force) {
+      this.gladys.forgetPublishedStates(idsOf(this.gladys, entry).device);
+    }
+    await this.gladys.publishChangedStates(states, { heartbeat: STATE_HEARTBEAT_MS });
   }
 
   /**
@@ -331,7 +346,7 @@ export class TwinklyService {
     try {
       const state = await this.talk(entry, () => readState(entry));
       this.remember(entry, state);
-      await this.publishEntryState(entry, state);
+      await this.publishEntryState(entry, state, { force: true });
     } catch (err) {
       logger.debug(`Refresh of ${entry.name} failed: ${err?.message ?? err}`);
     }

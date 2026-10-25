@@ -3,7 +3,8 @@
 //
 // It reproduces the surface the integration relies on and records every call
 // so the tests can assert on it: externalIds, publishDiscoveredDevices,
-// publishState(s), publishTransports, setConnectionStatus, publishSceneEvent,
+// publishState(s), publishChangedStates (deduplicated like the SDK),
+// forgetPublishedStates, publishTransports, setConnectionStatus, publishSceneEvent,
 // requestWidgetRefresh and scanNetwork (answering what `scanReplies` holds).
 // No running Gladys, no WebSocket.
 // -----------------------------------------------------------------------------
@@ -16,6 +17,7 @@ export function createFakeGladys({ devices = [], scanReplies = [], scanError = n
   const sceneEvents = [];
   const widgetRefreshes = [];
   const scans = [];
+  const remembered = new Map();
 
   return {
     devices,
@@ -47,6 +49,36 @@ export function createFakeGladys({ devices = [], scanReplies = [], scanError = n
           featureExternalId: s.device_feature_external_id,
           state: s.text !== undefined ? s.text : s.state,
         });
+      }
+    },
+
+    // Mirrors the SDK: only the values that changed since the last one Gladys
+    // took, or older than the heartbeat; `forgetPublishedStates` resets that memory.
+    async publishChangedStates(states, { heartbeat } = {}) {
+      const now = Date.now();
+      const changed = states.filter((s) => {
+        const last = remembered.get(s.device_feature_external_id);
+        return (
+          last === undefined ||
+          last.state !== s.state ||
+          last.text !== s.text ||
+          (heartbeat !== undefined && now - last.at >= heartbeat)
+        );
+      });
+      for (const s of changed) {
+        remembered.set(s.device_feature_external_id, { state: s.state, text: s.text, at: now });
+      }
+      if (changed.length > 0) {
+        await this.publishStates(changed);
+      }
+      return { success: true, count: changed.length };
+    },
+
+    forgetPublishedStates(externalId) {
+      for (const id of [...remembered.keys()]) {
+        if (externalId === undefined || id === externalId || id.startsWith(`${externalId}:`)) {
+          remembered.delete(id);
+        }
       }
     },
 

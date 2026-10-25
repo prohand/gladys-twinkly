@@ -65,6 +65,63 @@ test('scene triggers, scene actions and widgets need Gladys >= 5.1.0', () => {
   assert.ok(major > 5 || (major === 5 && minor >= 1), manifest.gladys_version);
 });
 
+// Gladys 5.3 opened the catalog `keywords` / `countries` and the `music` field;
+// an older core rejects the whole manifest over an unknown field.
+test('keywords, countries and music need Gladys >= 5.3.0', () => {
+  assert.equal(manifest.gladys_version, '>=5.3.0');
+  if (manifest.keywords || manifest.countries || manifest.music) {
+    const [major, minor] = minGladysVersion();
+    assert.ok(major > 5 || (major === 5 && minor >= 3), manifest.gladys_version);
+  }
+});
+
+// The store's catalog shelves (Gladys 5.3 added the last four). An unknown key is
+// only dropped with a warning, so a typo would silently cost the shelf.
+const CATEGORIES = [
+  'climate',
+  'lighting',
+  'energy',
+  'security',
+  'multimedia',
+  'appliances',
+  'environment',
+  'protocols',
+  'network',
+  'notifications',
+  'assistants',
+  'services',
+  'transport',
+  'vehicles',
+  'servers',
+  'leisure',
+];
+
+test('categories: one to three shelves of the store vocabulary', () => {
+  assert.ok(manifest.categories.length >= 1 && manifest.categories.length <= 3);
+  assert.equal(new Set(manifest.categories).size, manifest.categories.length);
+  for (const category of manifest.categories) {
+    assert.ok(CATEGORIES.includes(category), `unknown category "${category}"`);
+  }
+});
+
+test('keywords: 1 to 10 unique search terms of 2 to 30 characters', () => {
+  const { keywords } = manifest;
+  assert.ok(Array.isArray(keywords) && keywords.length >= 1 && keywords.length <= 10);
+  for (const keyword of keywords) {
+    assert.equal(typeof keyword, 'string');
+    const length = keyword.trim().length;
+    assert.ok(length >= 2 && length <= 30, `keyword "${keyword}" must be 2-30 characters`);
+  }
+  const normalized = keywords.map((keyword) => keyword.trim().toLowerCase());
+  assert.equal(new Set(normalized).size, normalized.length, 'keywords must be unique');
+});
+
+test('countries: none, Twinkly lights work the same everywhere', () => {
+  // A declared list hides the integration from the browse views of every other
+  // country; worldwide is the right default for a hardware brand.
+  assert.equal(manifest.countries, undefined);
+});
+
 // A core older than 5.2 drops the form of a widget button and runs the action
 // without `values`: the form and the version floor move together.
 test('the widget "Play…" form needs Gladys >= 5.2.0, and index.js relays its values', () => {

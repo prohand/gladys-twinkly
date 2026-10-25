@@ -65,7 +65,11 @@ test/helpers/               fakeGladys (SDK), fakeTwinkly (fetch), setup (wired 
 - **Every JSON answer carries `code`**: anything but 1000 is a failure, even under
   HTTP 200.
 - **Polling**: Gladys `poll_frequency` must be one of 1000, 2000, 10000, 15000, 30000,
-  60000 ms, with `should_poll: true`; anything else rejects the WHOLE discovery batch.
+  60000 ms; anything else rejects the WHOLE discovery batch. Gladys 5.3+ sets
+  `should_poll` itself; it is still published as `true` for the devices created by
+  older cores.
+- **States** go through `publishChangedStates` (30-minute heartbeat): a poll sends what
+  changed; the read after a Gladys order is sent whole.
 - **Scene triggers fire on transitions only**, and never for a change Gladys ordered
   (`entry.commands` makes a poll racing an order drop its stale read): a scene must not
   loop through the integration.
@@ -85,6 +89,7 @@ test/helpers/               fakeGladys (SDK), fakeTwinkly (fetch), setup (wired 
   description holds 10 to 100 characters per language. `docs/en.md`, `docs/fr.md`,
   `docs/de.md`, `docs/es.md` stay in sync.
   `test/manifest.test.js` ties the manifest to the code: change both sides together.
+  `keywords` (1-10 search terms) needs `gladys_version >=5.3.0`, the floor it pins.
 - **The container rootfs is read-only**: write only under `/data`. Never log tokens.
 - **Style**: Prettier formats, ESLint catches mistakes. Comments explain why, in
   English. Tests never touch the network (`test/helpers/fakeTwinkly.js` fakes `fetch`).

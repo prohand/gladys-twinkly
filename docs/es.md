@@ -9,7 +9,7 @@ Esta integración conecta Gladys con sus luces LED inteligentes **Twinkly**
 - Configure primero cada Twinkly con la **aplicación Twinkly** y conéctelo a su
   Wi-Fi.
 - Debe estar en la **misma red** que Gladys.
-- Gladys **5.2** o posterior.
+- Gladys **5.3** o posterior.
 - Recomendado: asígnele una **IP fija** (reserva DHCP en su router). Si su IP
   cambia, la integración lo vuelve a encontrar, pero más despacio.
 

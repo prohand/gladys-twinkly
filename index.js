@@ -73,6 +73,10 @@ gladys.onConfigUpdated(async (config) => {
 
 // --- Connection lifecycle -------------------------------------------------------
 gladys.on('connected', async () => {
+  // Gladys may have restarted while we were away: what the SDK remembers of
+  // the published states no longer says what it holds, so the next poll sends
+  // every value again.
+  gladys.forgetPublishedStates();
   try {
     service.setConfig(await gladys.getConfig());
     await service.discover();

@@ -9,7 +9,7 @@ votre propre réseau : pas de compte, pas de cloud.
 - Installez d'abord chaque Twinkly avec l'**application Twinkly** et
   connectez-le à votre Wi-Fi.
 - Il doit être sur le **même réseau** que Gladys.
-- Gladys **5.2** ou plus.
+- Gladys **5.3** ou plus.
 - Conseillé : donnez-lui une **IP fixe** (réservation DHCP dans votre box).
   Si son IP change, l'intégration le retrouve, mais plus lentement.
 
