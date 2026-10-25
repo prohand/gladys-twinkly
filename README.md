@@ -28,6 +28,8 @@ Since Gladys 5.1 it also extends the scene editor and the dashboard:
 - **Widget**: one row per Twinkly, "All on" / "All off" buttons; or one Twinkly with button
   sets, among them a "Play…" form (any mode, movie or effect, and a brightness — Gladys 5.2+).
 
+Requires **Gladys 5.3.0** or later.
+
 ## How it talks to the hardware
 
 One transport, declared in the manifest: **local**. Twinkly has no public cloud API; the

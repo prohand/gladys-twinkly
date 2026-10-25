@@ -158,8 +158,9 @@ export function buildDevice(gladys, entry, config) {
     name: entry.name,
     external_id: ids.device,
     model: entry.productCode ?? 'Twinkly',
-    // Gladys only polls a device that carries should_poll, at one of its own
-    // ticks in milliseconds (see config.js).
+    // Gladys polls at one of its own ticks in milliseconds (see config.js).
+    // Since 5.3 the core sets should_poll itself next to a poll_frequency;
+    // older cores only polled a device that carried it.
     should_poll: true,
     poll_frequency: gladysPollFrequency(config.refreshSeconds),
     params,

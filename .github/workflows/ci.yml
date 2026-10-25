@@ -61,7 +61,7 @@ jobs:
     # couplings, cover). Pull requests only. The image is not checked: on a pull
     # request the `docker_image` tag is not pushed yet (only the Release workflow
     # pushes it, and before the first release it does not exist at all), so the
-    # registry answers 404. The indexer itself still checks it once published.
+    # registry answers 404. release.yml runs the full check once it is published.
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     name: Store admission checks

@@ -82,6 +82,23 @@ test('poll publishes the state', async () => {
   assert.equal(gladys.sceneEvents.length, 0);
 });
 
+test('a poll only re-sends what changed; an order re-sends everything', async () => {
+  const { service, gladys, entry, ids, device, feature } = await ready();
+  const gDevice = gladysDevice(service, entry);
+  await service.poll(gDevice);
+  await service.poll(gDevice);
+  // Gladys takes 300 states a minute: an unchanged value is not sent twice.
+  assert.deepEqual(gladys.statesOf(ids.feature(FEATURES.BRIGHTNESS)), [80]);
+  device.brightness = 40;
+  await service.poll(gDevice);
+  assert.deepEqual(gladys.statesOf(ids.feature(FEATURES.BRIGHTNESS)), [80, 40]);
+  assert.deepEqual(gladys.statesOf(ids.feature(FEATURES.ON_OFF)), [1]);
+  // After a Gladys order the device's answer is sent whole: it confirms (or
+  // undoes) what the dashboard already shows.
+  await service.setValue(gDevice, feature(FEATURES.COLOR), 0xff0000);
+  assert.deepEqual(gladys.statesOf(ids.feature(FEATURES.BRIGHTNESS)), [80, 40, 40]);
+});
+
 test('a mode changed from the app fires mode_changed, once', async () => {
   const { service, gladys, entry, device } = await ready();
   const gDevice = gladysDevice(service, entry);
