@@ -10,6 +10,8 @@ the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.3.4] - 2026-11-23
+
 ### Fixed
 
 - Devices were never created when a movie name (or a device name) began or ended with a
@@ -93,7 +95,8 @@ trailing whitespace`). Names are now trimmed.
   color, IP, LEDs, firmware, and a set of buttons picked in its settings (on/off,
   previous/next scene, identify; brightness −/+/max; modes; solid colors).
 
-[Unreleased]: https://github.com/prohand/gladys-twinkly/compare/v1.3.3...HEAD
+[Unreleased]: https://github.com/prohand/gladys-twinkly/compare/v1.3.4...HEAD
+[1.3.4]: https://github.com/prohand/gladys-twinkly/compare/v1.3.3...v1.3.4
 [1.3.3]: https://github.com/prohand/gladys-twinkly/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/prohand/gladys-twinkly/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/prohand/gladys-twinkly/compare/v1.3.0...v1.3.1
