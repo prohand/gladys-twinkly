@@ -10,6 +10,12 @@ the version's GitHub Release.
 
 ## [Unreleased]
 
+### Fixed
+
+- Devices were never created when a movie name (or a device name) began or ended with a
+  space: Gladys refused the whole list (`supported_options ... must not have leading or
+trailing whitespace`). Names are now trimmed.
+
 ## [1.3.3] - 2026-11-16
 
 - Maintenance release, no functional change.

@@ -88,7 +88,7 @@ export class TwinklyRegistry {
     entry.host = host;
     entry.client = entry.client?.host === host ? entry.client : client;
     entry.gestalt = gestalt;
-    entry.name = gestalt.device_name || `Twinkly ${platformId.slice(-6)}`;
+    entry.name = String(gestalt.device_name ?? '').trim() || `Twinkly ${platformId.slice(-6)}`;
     entry.productCode = gestalt.product_code ?? null;
     entry.ledCount = Number(gestalt.number_of_led ?? 0);
     entry.ledProfile = gestalt.led_profile ?? 'RGB';

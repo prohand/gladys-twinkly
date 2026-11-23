@@ -78,6 +78,23 @@ test('scene options list the movies, the playlist and the effects with stable va
   );
 });
 
+test('scene labels never carry leading or trailing whitespace (the core rejects them)', () => {
+  const e = entry();
+  e.movies = [
+    { id: 0, unique_id: 'aaa', name: 'Snowfall ' },
+    { id: 1, unique_id: 'bbb', name: '   ' },
+  ];
+  assert.deepEqual(
+    sceneOptions(e)
+      .filter((o) => o.value.startsWith('movie:'))
+      .map((o) => [o.value, o.label]),
+    [
+      ['movie:aaa', 'Snowfall'],
+      ['movie:bbb', 'Movie 1'],
+    ],
+  );
+});
+
 test('a scene value reads back', () => {
   const e = entry();
   assert.equal(parseScene(e, 'movie:bbb').movie.name, 'Fireworks');

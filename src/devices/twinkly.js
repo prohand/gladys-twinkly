@@ -53,7 +53,10 @@ export function movieKey(movie) {
 export function sceneOptions(entry) {
   const options = [];
   for (const movie of entry.movies ?? []) {
-    options.push({ value: `movie:${movieKey(movie)}`, label: movie.name || `Movie ${movie.id}` });
+    // The app keeps the spaces typed around a movie name, the core rejects the
+    // WHOLE device batch for a label with leading or trailing whitespace.
+    const name = String(movie.name ?? '').trim();
+    options.push({ value: `movie:${movieKey(movie)}`, label: name || `Movie ${movie.id}` });
   }
   if ((entry.playlist ?? []).length > 0) {
     options.push({ value: PLAYLIST_SCENE, label: 'Playlist' });
